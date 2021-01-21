@@ -1,4 +1,5 @@
 baseURL: https://gongcastro.netlify.app
+url-pretty: "gongcastro.netlify.app"
 title: Gonzalo Garcia-Castro
 DefaultContentLanguage: en
 theme: hugo-theme-hello-friend-ng
@@ -35,7 +36,7 @@ taxonomies:
   tag: tags
 params:
   contentTypeName: posts
-  customCSS: []
+  customCSS: ["custom.css"]
   customJS: []
   dateform: Jan 2, 2006
   dateformNum: '2006-01-02'
@@ -47,9 +48,17 @@ params:
   images: ''
   justifyContent: no
   keywords: 'Developmental psychology, psycholonguistics, Rstats'
+  round-avatar: true
+  ORCID: 0000-0002-8553-4209
+  google-scholar: fHetiuQAAAAJ&hl
   logo:
-    logoHomeLink: /
+    logoHomeLink: /img/logo.png
     logoText: $ cd /gongcastro/
+    logoCursorColor: #e8b941
+  portrait:
+    path: /img/logo.png
+    alt: Logo
+    maxWidth: 100px
   social:
     - name: twitter
       url: https://twitter.com/gongcastro
@@ -57,7 +66,7 @@ params:
       url: mailto:gonzalo.garciadecastro@upf.edu
     - name: github
       url: https://github.com/gongcastro
-  themeColor: '#252627'
+  themeColor: #e8b941
 languages:
   en:
     copyright: <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank"
