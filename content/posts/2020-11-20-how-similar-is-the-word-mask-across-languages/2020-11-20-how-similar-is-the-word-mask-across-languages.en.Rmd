@@ -99,14 +99,14 @@ expanded_ort <- expand_grid(label1 = dat$label,
 
 ```
 
-![](/img/masks_ort.png)
+![](/posts/2020-11-20-how-similar-is-the-word-mask-across-languages/2020-11-20-how-similar-is-the-word-mask-across-languages.en_files/masks_ort.png)
 
 ## Phonological distance
 
 The phonological similarity/distance may be more informative. This time I searched for or generated with the help of a native speaker a phonological IPA transcription of each word-form. I then used this transcription as input to compute the phonological similarity of each pair of translation equivalents. A pitfall in this process is the fact that phonemes are almost never identical across languages, so even the common phoneme /m/ could vary slightly on its pronunciation in two languages. If this difference is encoded in the IPA transcription (as different characters), the Levenshtein distance will be inflated. For this reason, I simplified some IPA transcriptions to preserve this similarity. I also removed tones. This is terribly wrong from a linguistics perspective, but it's the only way I see to be able to play with some reliable data. Also I'm no linguist, so you have no power here.
 
 
-![](/img/power.gif)
+![](/posts/2020-11-20-how-similar-is-the-word-mask-across-languages/2020-11-20-how-similar-is-the-word-mask-across-languages.en_files/power.gif)
 
 Here's the same analysis performed on phonological transcriptions of a subset of those languages (*N* = 75 pairs, those I could find a reliable IPA transcription for or could find help from a native speaker):
 
@@ -137,7 +137,7 @@ expanded_phon <- expand_grid(label_phon1 = dat$label_phon,
 
 ```
 
-![](/img/masks_phon.png)
+![](/posts/2020-11-20-how-similar-is-the-word-mask-across-languages/2020-11-20-how-similar-is-the-word-mask-across-languages.en_files/masks_phon.png)
 
 ## Onsets
 
@@ -171,7 +171,7 @@ onsets <- list(
 
 ```
 
-![](/img/masks_onset.png)
+![](/posts/2020-11-20-how-similar-is-the-word-mask-across-languages/2020-11-20-how-similar-is-the-word-mask-across-languages.en_files/masks_onset.png)
 
 ## Some disclaimers:
 
