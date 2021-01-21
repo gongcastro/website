@@ -1,0 +1,117 @@
+---
+title: Visualising polynomial regression
+author: Gonzalo Garcia-Castro
+date: '2021-01-21'
+slug: visualising-polynomial-regression
+categories: []
+tags: []
+toc: no
+images: ~
+output:
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: scroll
+---
+
+## TL;DR
+
+> The outputs of polynomial regression can be difficult to interpret. I generated some animated plots to see how model predictions change across different combinations of coefficients for 1st, 2nd, and 3rd degree polinomials.
+
+## Why polynomials
+
+When modelling data using regression, sometimes the relationship between input variables and output variables is not very well captured by a straight line. A standard linear model is defined by the equation 
+
+$$y_i = \beta_{0} + \beta_{1}x_{i}$$
+
+where $\beta_{0}$ is the **intercept** (the value of the input variable $x$ where the output variable $y=0$, and where $\beta_{1}$ is the **coefficient** of the input variable (how much $y$ increases for every unit increase in $x$). To illustrate this, let's imagine we are curious abut what proportion of the students in a classroom are paying attention, and how this proportion changes as minutes pass. We could formalise our model as
+
+$y_i = \beta_{0} + \beta{1} Time_i$.
+
+Let's generate some data to illustrate this example. Let's say that, at the beginning of the lesson, almost 100% of the students are paying attention, but that after some time stop paying attention. Right before the end of the class, students start paying attention again.
+
+![](/posts/2021-01-21-visualising-polynomial-regression/2021-01-21-visualising-polynomial-regression.en_files/attention.png)
+
+The attention paid by the students did not decay linearly, but first dropped and rose up again, following a curvilinear trend, quadratic in this case. In these cases, we may want to perform some transformation on some input variables to account for this non-linear relationship. One of these transformations are **polynomial transformations**. In this context, when we talk about applying a polynomial function to a set of values, we usually mean exponentiating it by a positive number larger than 1. The power by which we exponentiate our variable defines the degree of the polynomial we are obtaining. Exponentiating our variable to the power of 2 will give us its second-degree polynomial. Exponentiating it by 3 will give us its third-degree polynomial, and so on. Back to our classroom example, we could add a new term to our regression equation: the second-degree polynomial of the input variable $Time$, or even a third degree polynomial if we wanted to test to what extend our model follows a more complex pattern. Our regression trend will not be linear any more, but curvilinear. We will first take a look at the anatomy of polynomials from a visual (and very informal perspective), and then we will come back to this data to model try to model it. Our model would look like this: 
+
+$$
+y_i = \beta_{0} + \beta_{1} Time_i + \beta_{2} Time_{i}^2 + \beta_{3} Time^3
+$$
+
+
+Adding polynomial terms to our regression offers much flexibility to researchers when modelling this kind of associations between input and output variables. This practice is, for example, common in Cognitive Science when analysing **repeated measures** data such as eye-tracking data, where we register what participants fixated in a screen during a trial under several conditions. Polynomial regression could be considered as of the main techniques in the more general category of **Growth Curve Analyis** (GCA) methods. If you are interested in learning GCA, you should take a look at Daniel Mirman's "Growth Curve Analysis and Visualization Using R".
+
+Powerful as this technique is, it presents some pitfalls, especially to newbies like me. For instance, **interpreting the outputs** of a regression model that includes polynomials can tricky. In our example, depending on the values of the coefficients $\beta_{1}$, $\beta_2$ and $\beta_3$--the first-degree and second-degree polynomials of $Time$--the shape of the resulting curve will be different. The combination of values that these two coefficient can take is infinite, and so is the number of potential shapes our curve can adopt. Interpreting how the values of these coefficients affect the shape of our model, and more importantly, their interaction with other predictors of interest in the model can be difficult without any kind of **visualisation.** The aim of this post is to visualise how the regression lines of a regression model changes with the degree of its polynomials. For computational constraints, and to make visualisation easier, I will only cover one, two, and three-degree polynomials. I will generate plots for multiple combinations of the coefficients of these polynomials using the base R function `poly()` to generate polynomials, the R package `ggplot2()` to generate plots, and the `gganimate` R package to animate the plots. I will briefly describe what is going on in each plot, but I hope the figures are themselves more informative than anything I can say about them! 
+
+
+## Intercept
+
+First, let's start with how the value of the **intercept** ($\beta_0$) changes the regression line for polynomials of different degree (1st, 2nd, and 3rd). I set the rest of the coefficients to arbitrary values for simplicity ($\beta_0 = \beta_1 = \beta_2 = \beta_3 = 1$). As you can see, regardless of the order of the polynomials involved in the model, increasing the intercept makes the line be higher in the Y-axis, and decreasing the value of the intercept make the line be lower in the Y-axis. Simple as that.
+
+![](/posts/2021-01-21-visualising-polynomial-regression/2021-01-21-visualising-polynomial-regression.en_files/intercept.gif)
+
+
+Thus, the interpretation of the intercept is similar to how do interpret it in standard linear regression models. It tells us the value of $y$ when all other coefficients are set to 0. As we will discuss later, what that means depends on what that zero means for the other coefficients, that is, how we coded them. For now, let's cotinue adding more terms to the equation.
+
+
+## Linear term: adding a 1st-order polynomial
+
+Now let's see how a linear model (with only a 1st degree polynomial) changes as we vary the value of $\b_1$, the coefficient of the linear term $Time$. As you can see, nothing special happens, the line just gets steeper, meaning that for every unit increase in $x$, $y$ increases (or decreases, depending on the sign) in $\b_1$ units. When the coefficient equals zero, there is no increase nor decrease in $y$ for any change in $x$.
+
+![](/posts/2021-01-21-visualising-polynomial-regression/2021-01-21-visualising-polynomial-regression.en_files/linear.gif)
+
+When $\beta_1=0$, the resulting line is completely horizontal, parallel to the X-axis. This is what a model with just an intercept ($y = \beta_{0}$) would look like. We generalise this to say that the linear model we just visualised is exactly the same as adding a 2nd and a 3rd degree polynomial to the model with their correspondent coefficients set to zero ($\beta_2 = 0$ and $`\beta_3 = 0$, respectively).
+ 
+ 
+## Quadratic: adding a 2nd-order polynomial
+
+Now things get a bit more interesting. When we add a second order polynomial ($Time^2$), the line is not linear any more. If the coefficient of the 2nd-order polynomial ($\beta_2$) is positive, the curve will go down and up in that order. When $\beta_2 < 0$, the curve goes up and then down. When $\beta_2 = 0$, the curve turns out the be a line whose slope is defined by $\beta_1$, just like in the previous example.
+
+![](/posts/2021-01-21-visualising-polynomial-regression/2021-01-21-visualising-polynomial-regression.en_files/quadratic.gif)
+
+Importantly, varying the value of the coefficient of 1st-order polynomials ($\beta_1$) also changes the shape of the curve: more positive values of $\beta_1$ make the curve "fold" at higher values of $x$. As you can see, when $\beta_1 < 0$ (left panel, in blue), the point at which the curve starts increasing or decreasing occurs more to the left. When $\beta_2 > 0$, this change occurs more to the right.
+ 
+ 
+## Cubic: adding a 3rd-order polynomial
+
+Finally, let's complicate things a bit more by adding a third-order polynomial. Now the curve will "fold" two times. As in the previous example, it's the value of $\beta_2$ (the coefficient of the 2nd order polynomial) that determines whether the curve goes down-up-down or up-down-up, depending on whether $\beta_2 < 0$ (*up-down-up*) or $\beta_2 > 0$ (*down-up-down*). how larger the value of the coefficient of the 3rd-order polynomial is (regardless of whether it's positive or negative) determines, for both "folding" points, how quickly the curve rises after dropping (if $\beta_2 > 0$), or how how quickly it drops after rising (if $\beta_2 < 0$). Finally, the value of $\beta_1$ changes the value of $x$ at which the curve folds. More negative values of $\beta_1$ make the curve fold at lower values of $x$, while more positive values of $\beta_1$ make the curve fold at higher values of $x$.
+
+
+![](/posts/2021-01-21-visualising-polynomial-regression/2021-01-21-visualising-polynomial-regression.en_files/cubic.gif)
+
+
+## Adding other predictors to the model
+
+Sometimes we're not only interested in analysing how $y$ changes across different values of $x$, but also in how a variable of interest changes this relationship. Back to our classroom example, we could be interested in whether the linear, quadratic, or cubic drop in attention depends on some other predictor, such as how boring the previous class was. We could include this new predictor in our model as a main effect ($Previous$) and adding its interaction with the linear, quadratic, and/or cubic transformations of the time variable ($(Time^1 \times Time^2 \times Time^3) \times Previous$). The extended model would look like this:
+
+$$
+y = \beta_0 + \beta_1 Time^1 + \beta_2 Time^2 + \beta_3 Time^3 + \beta_4 Previous + \beta_5 ((Time^1 + Time^2 + Time^3) \times Previous)
+$$
+
+
+It's a lot of parameters to estimate, especially if we then add random effects to our model (but let's keep it simple), and the output of the model may seem intimidating. However, once we have an intuition of how increasing or decreasing the value of any of the polynomial coefficients changes the shape of the model, the interpretation of the interaction terms becomes easier. The intercept ($\beta_0$ tells us the proportion of students paying attention when $Time=0$, and therefore also when $Time^2$ and $Time^3$ equal to zero). Depending on how we have coded the $Time$ variable, that zero will mean different things. If we leave the variable untransformed, meaning that $Time = 0$ at the beginning of the class, the intercept ($beta_0$ tells us whether how boring the previous class was affects the level of attention at the beginning of our class). Had we centred the $Time$ variable before fitting the model (by subtracting the its mean from each value), $Time=0$ would indicate the proportion of students paying attention at a mean value of the class. Anyway, we may be more interested in other coefficients. 
+
+In the context of our (3rd-degree) polynomial model, the coefficient of the 1st-degree polynomial of $Time$ ($\beta_1$) tells us how much quickly the curve of the proportion of students paying attention changes from rising to dropping or from dropping to rising (depending on the value of $\beta_2$). Whichever the value of the other coefficients, this value tells us at which point in time students begin to stop paying attention (or start paying attention). The coefficient of the 2nd-degree polynomial ($\beta_2)$ tells us whether students start paying attention and then stop doing it, or whether they start by not paying attention an the they do. The coefficient of the 3rd-degree polynomial tells us how quickly students stop paying attention after paying it (when $\beta_2 < 0$), or how quickly they start paying attention after they stopped doing it (when $\beta_2 > 0$).
+
+The coefficient of the main effect of $Previous$ ($\beta_4$) tells us how much the proportion of students paying attention ($y$) decreases (if negative) of increases (if positive) for every minute that passes, keeping all other predictors at 0 (in our case, at the beginning of our class). This coefficient is a bit difficult to interpret by itself, especially in our case given that we have not centred the variable $Time$. 
+Finally, let's interpret the interactions. The coefficient of the interaction $Time^1 \times Previous$ ($\beta_5$) tells us how much the coefficient of $Times^1$ ($\beta_1$) changes for every unit change $Previous$. In our case when the value of $Previous$ increases in one unit, the coefficient of $Time^1$ changes in $\beta_5$ units. Translated to our model, this means that that point at which the curve of students paying attention folds occurs earlier when $\beta_5 > 0$, and occurs later when $\beta_5 < 0$.
+
+The interaction $Time^2 \times Previous$ tells us how much the coefficient of $Times^2$ ($\beta_2$) changes for every unit change $Previous$. This means that, for every unit increase in $Previous$ (how boring the previous class was), the coefficient of $Time^2$ will be larger. Positive values of $\beta_2$ will make the curve we closer to the *down-up-down* pattern, while negative values of $\beta_2$ will make the curve be closer to the *up-down-up* pattern. Either way, this interaction informs us about how closer to our model gets to a curve that folds more than once for every increment in previous boredom. As said before, when $\beta_2=0$, the curve becomes a straight line.
+
+Finally, the coefficient of the $Time^3 \times Previous$ interaction ($\beta_5$) indicates how much the coefficient of the 3rd-order polynomial of time ($\beta_3$) increases for every unit the "boredom" of the previous class increases. This coefficient informs us of how drastic the change from *ascending* to *descending* (or *vice versa*) of the curve is. Therefore, positive values of the coefficient of its interaction with $Previous$ ($\beta_5$) tell us that previous boredom increases how drastic the loss or gain of attention is (depending on the value of the coefficient of the 2nd-order polynomial), and negative values will tell us that the curve is closer to a curve than only "folds" one. In our classroom example, this coefficient would be rather low, since our data clearly follows a quadratic trend.
+
+## Conclusion
+
+There are way more things to say about polynomial regression, and its's more than likely that I sacrifice accuracy for simplicity. After all, the aim of generating these animations was helping myself understand the outpus of polynomial models a bit more easily in the futur. I hope it helps other stoo. If you consider something is misleading or unaccurate, please let me know! I'm the first interested in getting it right. Cheers!
+
+## Just the code
+
+<script src="https://gist.github.com/gongcastro/9eb9e0c7e7502b48514514fef83fc509.js"></script>
+
+## Session info
+
+```{r}
+
+sessionInfo()
+
+```
+

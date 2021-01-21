@@ -1,0 +1,1869 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>Posts on Gonzalo Garcia-Castro</title>
+        <link>https://gongcastro.netlify.app/posts/</link>
+        <description>Recent content in Posts on Gonzalo Garcia-Castro</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <copyright>&lt;a href=&#34;https://creativecommons.org/licenses/by-nc/4.0/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;CC BY-NC 4.0&lt;/a&gt;</copyright>
+        <lastBuildDate>Thu, 21 Jan 2021 00:00:00 +0000</lastBuildDate>
+        <atom:link href="https://gongcastro.netlify.app/posts/index.xml" rel="self" type="application/rss+xml" />
+        
+        <item>
+            <title>Visualising polynomial regression</title>
+            <link>https://gongcastro.netlify.app/posts/2021/01/visualising-polynomial-regression/</link>
+            <pubDate>Thu, 21 Jan 2021 00:00:00 +0000</pubDate>
+            
+            <guid>https://gongcastro.netlify.app/posts/2021/01/visualising-polynomial-regression/</guid>
+            <description>TL;DRThe outputs of polynomial regression can be difficult to interpret. I generated some animated plots to see how model predictions change across different combinations of coefficients for 1st, 2nd, and 3rd degree polinomials.
+Why polynomialsWhen modelling data using regression, sometimes the relationship between input variables and output variables is not very well captured by a straight line. A standard linear model is defined by the equation</description>
+            <content type="html"><![CDATA[
+<script src="/rmarkdown-libs/header-attrs/header-attrs.js"></script>
+
+<div id="TOC">
+
+</div>
+
+<div id="tldr" class="section level2">
+<h2>TL;DR</h2>
+<blockquote>
+<p>The outputs of polynomial regression can be difficult to interpret. I generated some animated plots to see how model predictions change across different combinations of coefficients for 1st, 2nd, and 3rd degree polinomials.</p>
+</blockquote>
+</div>
+<div id="why-polynomials" class="section level2">
+<h2>Why polynomials</h2>
+<p>When modelling data using regression, sometimes the relationship between input variables and output variables is not very well captured by a straight line. A standard linear model is defined by the equation</p>
+<p><span class="math display">\[y_i = \beta_{0} + \beta_{1}x_{i}\]</span></p>
+<p>where <span class="math inline">\(\beta_{0}\)</span> is the <strong>intercept</strong> (the value of the input variable <span class="math inline">\(x\)</span> where the output variable <span class="math inline">\(y=0\)</span>, and where <span class="math inline">\(\beta_{1}\)</span> is the <strong>coefficient</strong> of the input variable (how much <span class="math inline">\(y\)</span> increases for every unit increase in <span class="math inline">\(x\)</span>). To illustrate this, let’s imagine we are curious abut what proportion of the students in a classroom are paying attention, and how this proportion changes as minutes pass. We could formalise our model as</p>
+<p><span class="math inline">\(y_i = \beta_{0} + \beta{1} Time_i\)</span>.</p>
+<p>Let’s generate some data to illustrate this example. Let’s say that, at the beginning of the lesson, almost 100% of the students are paying attention, but that after some time stop paying attention. Right before the end of the class, students start paying attention again.</p>
+<p><img src="/posts/2021-01-21-visualising-polynomial-regression/2021-01-21-visualising-polynomial-regression.en_files/attention.png" /></p>
+<p>The attention paid by the students did not decay linearly, but first dropped and rose up again, following a curvilinear trend, quadratic in this case. In these cases, we may want to perform some transformation on some input variables to account for this non-linear relationship. One of these transformations are <strong>polynomial transformations</strong>. In this context, when we talk about applying a polynomial function to a set of values, we usually mean exponentiating it by a positive number larger than 1. The power by which we exponentiate our variable defines the degree of the polynomial we are obtaining. Exponentiating our variable to the power of 2 will give us its second-degree polynomial. Exponentiating it by 3 will give us its third-degree polynomial, and so on. Back to our classroom example, we could add a new term to our regression equation: the second-degree polynomial of the input variable <span class="math inline">\(Time\)</span>, or even a third degree polynomial if we wanted to test to what extend our model follows a more complex pattern. Our regression trend will not be linear any more, but curvilinear. We will first take a look at the anatomy of polynomials from a visual (and very informal perspective), and then we will come back to this data to model try to model it. Our model would look like this:</p>
+<p><span class="math display">\[
+y_i = \beta_{0} + \beta_{1} Time_i + \beta_{2} Time_{i}^2 + \beta_{3} Time^3
+\]</span></p>
+<p>Adding polynomial terms to our regression offers much flexibility to researchers when modelling this kind of associations between input and output variables. This practice is, for example, common in Cognitive Science when analysing <strong>repeated measures</strong> data such as eye-tracking data, where we register what participants fixated in a screen during a trial under several conditions. Polynomial regression could be considered as of the main techniques in the more general category of <strong>Growth Curve Analyis</strong> (GCA) methods. If you are interested in learning GCA, you should take a look at Daniel Mirman’s “Growth Curve Analysis and Visualization Using R”.</p>
+<p>Powerful as this technique is, it presents some pitfalls, especially to newbies like me. For instance, <strong>interpreting the outputs</strong> of a regression model that includes polynomials can tricky. In our example, depending on the values of the coefficients <span class="math inline">\(\beta_{1}\)</span>, <span class="math inline">\(\beta_2\)</span> and <span class="math inline">\(\beta_3\)</span>–the first-degree and second-degree polynomials of <span class="math inline">\(Time\)</span>–the shape of the resulting curve will be different. The combination of values that these two coefficient can take is infinite, and so is the number of potential shapes our curve can adopt. Interpreting how the values of these coefficients affect the shape of our model, and more importantly, their interaction with other predictors of interest in the model can be difficult without any kind of <strong>visualisation.</strong> The aim of this post is to visualise how the regression lines of a regression model changes with the degree of its polynomials. For computational constraints, and to make visualisation easier, I will only cover one, two, and three-degree polynomials. I will generate plots for multiple combinations of the coefficients of these polynomials using the base R function <code>poly()</code> to generate polynomials, the R package <code>ggplot2()</code> to generate plots, and the <code>gganimate</code> R package to animate the plots. I will briefly describe what is going on in each plot, but I hope the figures are themselves more informative than anything I can say about them!</p>
+</div>
+<div id="intercept" class="section level2">
+<h2>Intercept</h2>
+<p>First, let’s start with how the value of the <strong>intercept</strong> (<span class="math inline">\(\beta_0\)</span>) changes the regression line for polynomials of different degree (1st, 2nd, and 3rd). I set the rest of the coefficients to arbitrary values for simplicity (<span class="math inline">\(\beta_0 = \beta_1 = \beta_2 = \beta_3 = 1\)</span>). As you can see, regardless of the order of the polynomials involved in the model, increasing the intercept makes the line be higher in the Y-axis, and decreasing the value of the intercept make the line be lower in the Y-axis. Simple as that.</p>
+<p><img src="/posts/2021-01-21-visualising-polynomial-regression/2021-01-21-visualising-polynomial-regression.en_files/intercept.gif" /></p>
+<p>Thus, the interpretation of the intercept is similar to how do interpret it in standard linear regression models. It tells us the value of <span class="math inline">\(y\)</span> when all other coefficients are set to 0. As we will discuss later, what that means depends on what that zero means for the other coefficients, that is, how we coded them. For now, let’s cotinue adding more terms to the equation.</p>
+</div>
+<div id="linear-term-adding-a-1st-order-polynomial" class="section level2">
+<h2>Linear term: adding a 1st-order polynomial</h2>
+<p>Now let’s see how a linear model (with only a 1st degree polynomial) changes as we vary the value of <span class="math inline">\(\b_1\)</span>, the coefficient of the linear term <span class="math inline">\(Time\)</span>. As you can see, nothing special happens, the line just gets steeper, meaning that for every unit increase in <span class="math inline">\(x\)</span>, <span class="math inline">\(y\)</span> increases (or decreases, depending on the sign) in <span class="math inline">\(\b_1\)</span> units. When the coefficient equals zero, there is no increase nor decrease in <span class="math inline">\(y\)</span> for any change in <span class="math inline">\(x\)</span>.</p>
+<p><img src="/posts/2021-01-21-visualising-polynomial-regression/2021-01-21-visualising-polynomial-regression.en_files/linear.gif" /></p>
+<p>When <span class="math inline">\(\beta_1=0\)</span>, the resulting line is completely horizontal, parallel to the X-axis. This is what a model with just an intercept (<span class="math inline">\(y = \beta_{0}\)</span>) would look like. We generalise this to say that the linear model we just visualised is exactly the same as adding a 2nd and a 3rd degree polynomial to the model with their correspondent coefficients set to zero (<span class="math inline">\(\beta_2 = 0\)</span> and <span class="math inline">\(`\beta_3 = 0\)</span>, respectively).</p>
+</div>
+<div id="quadratic-adding-a-2nd-order-polynomial" class="section level2">
+<h2>Quadratic: adding a 2nd-order polynomial</h2>
+<p>Now things get a bit more interesting. When we add a second order polynomial (<span class="math inline">\(Time^2\)</span>), the line is not linear any more. If the coefficient of the 2nd-order polynomial (<span class="math inline">\(\beta_2\)</span>) is positive, the curve will go down and up in that order. When <span class="math inline">\(\beta_2 &lt; 0\)</span>, the curve goes up and then down. When <span class="math inline">\(\beta_2 = 0\)</span>, the curve turns out the be a line whose slope is defined by <span class="math inline">\(\beta_1\)</span>, just like in the previous example.</p>
+<p><img src="/posts/2021-01-21-visualising-polynomial-regression/2021-01-21-visualising-polynomial-regression.en_files/quadratic.gif" /></p>
+<p>Importantly, varying the value of the coefficient of 1st-order polynomials (<span class="math inline">\(\beta_1\)</span>) also changes the shape of the curve: more positive values of <span class="math inline">\(\beta_1\)</span> make the curve “fold” at higher values of <span class="math inline">\(x\)</span>. As you can see, when <span class="math inline">\(\beta_1 &lt; 0\)</span> (left panel, in blue), the point at which the curve starts increasing or decreasing occurs more to the left. When <span class="math inline">\(\beta_2 &gt; 0\)</span>, this change occurs more to the right.</p>
+</div>
+<div id="cubic-adding-a-3rd-order-polynomial" class="section level2">
+<h2>Cubic: adding a 3rd-order polynomial</h2>
+<p>Finally, let’s complicate things a bit more by adding a third-order polynomial. Now the curve will “fold” two times. As in the previous example, it’s the value of <span class="math inline">\(\beta_2\)</span> (the coefficient of the 2nd order polynomial) that determines whether the curve goes down-up-down or up-down-up, depending on whether <span class="math inline">\(\beta_2 &lt; 0\)</span> (<em>up-down-up</em>) or <span class="math inline">\(\beta_2 &gt; 0\)</span> (<em>down-up-down</em>). how larger the value of the coefficient of the 3rd-order polynomial is (regardless of whether it’s positive or negative) determines, for both “folding” points, how quickly the curve rises after dropping (if <span class="math inline">\(\beta_2 &gt; 0\)</span>), or how how quickly it drops after rising (if <span class="math inline">\(\beta_2 &lt; 0\)</span>). Finally, the value of <span class="math inline">\(\beta_1\)</span> changes the value of <span class="math inline">\(x\)</span> at which the curve folds. More negative values of <span class="math inline">\(\beta_1\)</span> make the curve fold at lower values of <span class="math inline">\(x\)</span>, while more positive values of <span class="math inline">\(\beta_1\)</span> make the curve fold at higher values of <span class="math inline">\(x\)</span>.</p>
+<p><img src="/posts/2021-01-21-visualising-polynomial-regression/2021-01-21-visualising-polynomial-regression.en_files/cubic.gif" /></p>
+</div>
+<div id="adding-other-predictors-to-the-model" class="section level2">
+<h2>Adding other predictors to the model</h2>
+<p>Sometimes we’re not only interested in analysing how <span class="math inline">\(y\)</span> changes across different values of <span class="math inline">\(x\)</span>, but also in how a variable of interest changes this relationship. Back to our classroom example, we could be interested in whether the linear, quadratic, or cubic drop in attention depends on some other predictor, such as how boring the previous class was. We could include this new predictor in our model as a main effect (<span class="math inline">\(Previous\)</span>) and adding its interaction with the linear, quadratic, and/or cubic transformations of the time variable (<span class="math inline">\((Time^1 \times Time^2 \times Time^3) \times Previous\)</span>). The extended model would look like this:</p>
+<p><span class="math display">\[
+y = \beta_0 + \beta_1 Time^1 + \beta_2 Time^2 + \beta_3 Time^3 + \beta_4 Previous + \beta_5 ((Time^1 + Time^2 + Time^3) \times Previous)
+\]</span></p>
+<p>It’s a lot of parameters to estimate, especially if we then add random effects to our model (but let’s keep it simple), and the output of the model may seem intimidating. However, once we have an intuition of how increasing or decreasing the value of any of the polynomial coefficients changes the shape of the model, the interpretation of the interaction terms becomes easier. The intercept (<span class="math inline">\(\beta_0\)</span> tells us the proportion of students paying attention when <span class="math inline">\(Time=0\)</span>, and therefore also when <span class="math inline">\(Time^2\)</span> and <span class="math inline">\(Time^3\)</span> equal to zero). Depending on how we have coded the <span class="math inline">\(Time\)</span> variable, that zero will mean different things. If we leave the variable untransformed, meaning that <span class="math inline">\(Time = 0\)</span> at the beginning of the class, the intercept (<span class="math inline">\(beta_0\)</span> tells us whether how boring the previous class was affects the level of attention at the beginning of our class). Had we centred the <span class="math inline">\(Time\)</span> variable before fitting the model (by subtracting the its mean from each value), <span class="math inline">\(Time=0\)</span> would indicate the proportion of students paying attention at a mean value of the class. Anyway, we may be more interested in other coefficients.</p>
+<p>In the context of our (3rd-degree) polynomial model, the coefficient of the 1st-degree polynomial of <span class="math inline">\(Time\)</span> (<span class="math inline">\(\beta_1\)</span>) tells us how much quickly the curve of the proportion of students paying attention changes from rising to dropping or from dropping to rising (depending on the value of <span class="math inline">\(\beta_2\)</span>). Whichever the value of the other coefficients, this value tells us at which point in time students begin to stop paying attention (or start paying attention). The coefficient of the 2nd-degree polynomial (<span class="math inline">\(\beta_2)\)</span> tells us whether students start paying attention and then stop doing it, or whether they start by not paying attention an the they do. The coefficient of the 3rd-degree polynomial tells us how quickly students stop paying attention after paying it (when <span class="math inline">\(\beta_2 &lt; 0\)</span>), or how quickly they start paying attention after they stopped doing it (when <span class="math inline">\(\beta_2 &gt; 0\)</span>).</p>
+<p>The coefficient of the main effect of <span class="math inline">\(Previous\)</span> (<span class="math inline">\(\beta_4\)</span>) tells us how much the proportion of students paying attention (<span class="math inline">\(y\)</span>) decreases (if negative) of increases (if positive) for every minute that passes, keeping all other predictors at 0 (in our case, at the beginning of our class). This coefficient is a bit difficult to interpret by itself, especially in our case given that we have not centred the variable <span class="math inline">\(Time\)</span>.
+Finally, let’s interpret the interactions. The coefficient of the interaction <span class="math inline">\(Time^1 \times Previous\)</span> (<span class="math inline">\(\beta_5\)</span>) tells us how much the coefficient of <span class="math inline">\(Times^1\)</span> (<span class="math inline">\(\beta_1\)</span>) changes for every unit change <span class="math inline">\(Previous\)</span>. In our case when the value of <span class="math inline">\(Previous\)</span> increases in one unit, the coefficient of <span class="math inline">\(Time^1\)</span> changes in <span class="math inline">\(\beta_5\)</span> units. Translated to our model, this means that that point at which the curve of students paying attention folds occurs earlier when <span class="math inline">\(\beta_5 &gt; 0\)</span>, and occurs later when <span class="math inline">\(\beta_5 &lt; 0\)</span>.</p>
+<p>The interaction <span class="math inline">\(Time^2 \times Previous\)</span> tells us how much the coefficient of <span class="math inline">\(Times^2\)</span> (<span class="math inline">\(\beta_2\)</span>) changes for every unit change <span class="math inline">\(Previous\)</span>. This means that, for every unit increase in <span class="math inline">\(Previous\)</span> (how boring the previous class was), the coefficient of <span class="math inline">\(Time^2\)</span> will be larger. Positive values of <span class="math inline">\(\beta_2\)</span> will make the curve we closer to the <em>down-up-down</em> pattern, while negative values of <span class="math inline">\(\beta_2\)</span> will make the curve be closer to the <em>up-down-up</em> pattern. Either way, this interaction informs us about how closer to our model gets to a curve that folds more than once for every increment in previous boredom. As said before, when <span class="math inline">\(\beta_2=0\)</span>, the curve becomes a straight line.</p>
+<p>Finally, the coefficient of the <span class="math inline">\(Time^3 \times Previous\)</span> interaction (<span class="math inline">\(\beta_5\)</span>) indicates how much the coefficient of the 3rd-order polynomial of time (<span class="math inline">\(\beta_3\)</span>) increases for every unit the “boredom” of the previous class increases. This coefficient informs us of how drastic the change from <em>ascending</em> to <em>descending</em> (or <em>vice versa</em>) of the curve is. Therefore, positive values of the coefficient of its interaction with <span class="math inline">\(Previous\)</span> (<span class="math inline">\(\beta_5\)</span>) tell us that previous boredom increases how drastic the loss or gain of attention is (depending on the value of the coefficient of the 2nd-order polynomial), and negative values will tell us that the curve is closer to a curve than only “folds” one. In our classroom example, this coefficient would be rather low, since our data clearly follows a quadratic trend.</p>
+</div>
+<div id="conclusion" class="section level2">
+<h2>Conclusion</h2>
+<p>There are way more things to say about polynomial regression, and its’s more than likely that I sacrifice accuracy for simplicity. After all, the aim of generating these animations was helping myself understand the outpus of polynomial models a bit more easily in the futur. I hope it helps other stoo. If you consider something is misleading or unaccurate, please let me know! I’m the first interested in getting it right. Cheers!</p>
+</div>
+<div id="just-the-code" class="section level2">
+<h2>Just the code</h2>
+<script src="https://gist.github.com/gongcastro/9eb9e0c7e7502b48514514fef83fc509.js"></script>
+</div>
+<div id="session-info" class="section level2">
+<h2>Session info</h2>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>## R version 4.0.2 (2020-06-22)
+## Platform: x86_64-w64-mingw32/x64 (64-bit)
+## Running under: Windows 10 x64 (build 19041)
+## 
+## Matrix products: default
+## 
+## locale:
+## [1] LC_COLLATE=English_United States.1252 
+## [2] LC_CTYPE=English_United States.1252   
+## [3] LC_MONETARY=English_United States.1252
+## [4] LC_NUMERIC=C                          
+## [5] LC_TIME=English_United States.1252    
+## 
+## attached base packages:
+## [1] stats     graphics  grDevices utils     datasets  methods   base     
+## 
+## loaded via a namespace (and not attached):
+##  [1] compiler_4.0.2  magrittr_2.0.1  bookdown_0.21   tools_4.0.2    
+##  [5] htmltools_0.5.1 yaml_2.2.1      stringi_1.5.3   rmarkdown_2.6  
+##  [9] blogdown_1.1.4  knitr_1.30      stringr_1.4.0   digest_0.6.27  
+## [13] xfun_0.20       rlang_0.4.10    evaluate_0.14</code></pre>
+</div>
+]]></content>
+        </item>
+        
+        <item>
+            <title>How similar is the word &#34;mask&#34; across languages?</title>
+            <link>https://gongcastro.netlify.app/posts/2020/11/how-similar-is-the-word-mask-across-languages/</link>
+            <pubDate>Fri, 20 Nov 2020 00:00:00 +0000</pubDate>
+            
+            <guid>https://gongcastro.netlify.app/posts/2020/11/how-similar-is-the-word-mask-across-languages/</guid>
+            <description>The ubiquity of masks has given psycholinguists a frequent-ish stimulus to use in experiments. This word is more form-similar across languages than one may think. I gathered a big-ish dataset with translation equivalents of the word mask across ~110 languages. I tweeted about this today, and wanted to dedicate some more lines to nuance.
+The ubiquity of #masks😷 has given psycholinguists a frequent-ish stimulus to use in experiments.</description>
+            <content type="html"><![CDATA[
+<script src="/rmarkdown-libs/header-attrs/header-attrs.js"></script>
+
+<div id="TOC">
+
+</div>
+
+<p>The ubiquity of <strong>masks</strong> has given psycholinguists a frequent-ish stimulus to use in experiments. This word is more form-similar across languages than one may think. I gathered a big-ish dataset with translation equivalents of the word mask across ~110 languages. I tweeted about this today, and wanted to dedicate some more lines to nuance.</p>
+<blockquote class="twitter-tweet" data-theme="dark">
+<p lang="en" dir="ltr">
+The ubiquity of <a href="https://twitter.com/hashtag/masks?src=hash&amp;ref_src=twsrc%5Etfw">#masks</a>😷 has given psycholinguists a frequent-ish stimulus to use in experiments. This word is more form-similar across languages than one may think. 🌐<br>Here's how orthographically similar (the romanisations of) the translations of MASK are (N=110 pairs): <a href="https://t.co/KMMdJke9SG">pic.twitter.com/KMMdJke9SG</a>
+</p>
+— Gon García-Castro (<span class="citation">@gongcastro</span>) <a href="https://twitter.com/gongcastro/status/1331266541560729605?ref_src=twsrc%5Etfw">November 24, 2020</a>
+</blockquote>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+<p>Here’s the data:</p>
+<div style="height:600px; overflow-y: scroll">
+<style>html {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
+}
+
+#tnsykpblpd .gt_table {
+  display: table;
+  border-collapse: collapse;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#tnsykpblpd .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#tnsykpblpd .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#tnsykpblpd .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 0;
+  padding-bottom: 4px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#tnsykpblpd .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#tnsykpblpd .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#tnsykpblpd .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#tnsykpblpd .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#tnsykpblpd .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#tnsykpblpd .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#tnsykpblpd .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#tnsykpblpd .gt_group_heading {
+  padding: 8px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#tnsykpblpd .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#tnsykpblpd .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#tnsykpblpd .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#tnsykpblpd .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#tnsykpblpd .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 12px;
+}
+
+#tnsykpblpd .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#tnsykpblpd .gt_first_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+}
+
+#tnsykpblpd .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#tnsykpblpd .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#tnsykpblpd .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#tnsykpblpd .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#tnsykpblpd .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#tnsykpblpd .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding: 4px;
+}
+
+#tnsykpblpd .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#tnsykpblpd .gt_sourcenote {
+  font-size: 90%;
+  padding: 4px;
+}
+
+#tnsykpblpd .gt_left {
+  text-align: left;
+}
+
+#tnsykpblpd .gt_center {
+  text-align: center;
+}
+
+#tnsykpblpd .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#tnsykpblpd .gt_font_normal {
+  font-weight: normal;
+}
+
+#tnsykpblpd .gt_font_bold {
+  font-weight: bold;
+}
+
+#tnsykpblpd .gt_font_italic {
+  font-style: italic;
+}
+
+#tnsykpblpd .gt_super {
+  font-size: 65%;
+}
+
+#tnsykpblpd .gt_footnote_marks {
+  font-style: italic;
+  font-size: 65%;
+}
+</style>
+<div id="tnsykpblpd" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;"><table class="gt_table">
+  
+  <thead class="gt_col_headings">
+    <tr>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1"><strong>Language</strong></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1"><strong>Orthography</strong></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1"><strong>Orthography</strong><br>(romanisation)</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1"><strong>Phonology</strong> (IPA)</th>
+    </tr>
+  </thead>
+  <tbody class="gt_table_body">
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Afrikaans</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">masker</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">masker</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/mɑːsk/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Albanian</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maskë</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maskë</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/maskaɾiʝa/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Amharic</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">ጭምብል</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">ch'imibili</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/tʃ'imibili/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Arabic</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">قناع</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">qunae</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/qinaːʕ/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Armenian</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">դիմակ</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">dimak</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/dimɑk/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Azerbaijani</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maska</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maska</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/maska/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Bangla</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">মুখোশ</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">mukhosh</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Basque</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maskara</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maskara</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/maskaɾa/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Belarusian</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">маска</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maska</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/maska/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Bengali</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">মাস্ক</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">māska</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/mask/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Bosnian</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maska</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maska</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/maska/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Bulgarian</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">маска</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maska</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/maskə/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Catalan</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">mascareta</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">mascareta</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/məskəɾɛtə/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Cebuano</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maskara</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maskara</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/maskaɾa/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Chichewa</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">amabisa</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">amabisa</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/amaɓisa/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Chinese Simplified</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">手术口罩</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">shǒushù kǒuzhào</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/ʂə̌uʂʷù kʰə̌uʈʂàu/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Chinese Traditional</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">手術口罩</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">shǒushù kǒuzhào</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/ʂə̌uʂʷù kʰə̌uʈʂàu/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Corsican</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maschera</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maschera</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/maskeɾa/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Croatian</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maska</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maska</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/màska/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Czech</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maska</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maska</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/maska/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Danish</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maske</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maske</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/masgə  /</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Dutch</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">masker</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">masker</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/mɑskər/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">English</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">mask</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">mask</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/mɑːsk/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Esperanto</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">masko</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">masko</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/masko/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Estonian</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">naamio</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">naamio</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/naːmio/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Tagalog (Filipino)</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maskara</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maskara</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/maskaɾa/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Finnish (Suomi)</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">naamio</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">naamio</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/nɑːmio/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Finnish (Suomi)</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maskara</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maskara</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/mɑskɑrɑ/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Finnish (Suomi)</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">ripsiväri</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">ripsiväri</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/ripsiˌʋæri/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">French</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">masque</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">masque</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/mɑːsk/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Frisian</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">masker</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">masker</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/masker/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Galician</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">máscara</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">máscara</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/maskaɾa/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Georgian</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">ნიღაბი</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">nighabi</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/niɣɑbi/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">German</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Maske</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maske</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/maskə/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Greek</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">μάσκα</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">máska</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/maska/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Gujarati</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">મહોરું</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">mahorũ</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Hausa</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">abin rufe fuska</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">abin rufe fuska</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Hawaiian</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">pale maka</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">pale maka</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Hebrew</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">מסכה</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">masekháh</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Hindi</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">मुखौटा</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">mukhauta</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Hungarian</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maszk</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maszk</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/mɒsk/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Icelandic</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">gríma</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">gríma</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/kriːma/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Igbo</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">mkpu</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">mkpu</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/mkk͡p~ɓ̥u/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Indonesian</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">topeng</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">topeng</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/topɛŋ/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Indonesian</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">masker</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">masker</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/maskər/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Irish</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">masc</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">masc</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/mɑːsk/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Italian</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maschera</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">mascherina</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/maskeɾina/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Japanese</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">マスク</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">masuku</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/masɯkɯ/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Javanese</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">mask</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">mask</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Kannada</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">ಮಸುಕು</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">mukhavāḍa</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Kazakh</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">маска</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maska</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/maska/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Khmer</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">របាំង</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">rbang</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Kinyarwanda</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">agapfukamunwa</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">agapfukamunwa</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/agapfukamuŋwa/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Korean</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">마스크</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maseukeu</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/ma̠sʰɯkxɯ/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Kurdish (Kurmanji)</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">berrû</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">berrû</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/beru/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Kyrgyz</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">маска</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maska</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Lao</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">ຫນ້າກາກ</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">nā kāk</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Latvian</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maska</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maska</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/maska/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Lithuanian</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">kaukė</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">kaukė</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/kâˑʊ̯ke/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Luxembourgish</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">mask</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">mask</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/mask/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Macedonian</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">маска</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maska</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/maska/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Malay</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">topeng</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">topeng</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/topɛŋ/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Malay</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">کدوق</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">kedok</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/kedok/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Malayalam</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">മാസ്ക്</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">māsk</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Maltese</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maskra</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maskra</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/maskra/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Māori </td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maruhā</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maruhā</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/maɾuha/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Marathi</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">लपवू</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">lapavū</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Mongolian</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">маск</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">mask</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/mask/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Myanmar (Burmese)</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">မျက်နှာဖုံး</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">myakhnahpum</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/mjɛʔn̥əpʰóʊɴ/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Nepali</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">मुखवटा</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">mukhavaṭā</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Norwegian</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maskara</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maskara</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/maskara/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Odia</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">ମାସ୍କ</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">māska</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Pashto</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">ماسک</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">mâsk-hâ</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Persian (Farsi)</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">نقاب زدن</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">mask</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/mask/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Polish</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maska</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maska</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/maskɔ̃/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Portuguese</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">máscara</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">máscara</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/maskaɾa/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Punjabi</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">ਮਾਸਕ</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">māsaka</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Romanian</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">masca</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">masca</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/maska/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Russian</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">маскировать</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maskirovat'</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/məskʲɪrɐˈvatʲ/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Samoan</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">ufimata</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">ufimata</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Scots Gaelic</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">masg</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">masg</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/masɡ/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Serbian</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">маскa</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maska</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Sesotho</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">pata</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">pata</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Shona</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">chifukidzo</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">chifukidzo</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Sindhi</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">ماسڪ</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">nutarian</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Sinhala</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">වෙස්මුහුණ</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">vesmuhuṇa</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Slovak</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maskovať</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maskovať</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/maskovat/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Slovenian</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maska</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maska</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/maska/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Somali</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maaskaro</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maaskaro</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Spanish</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">máscara</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">máscara</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/maskaɾa/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Sundanese</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">topéng</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">topéng</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/topɛŋ/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Swahili</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">mask</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">mask</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/mask/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Swedish (Svenska)</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">mask</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">mask</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/mask/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Tajik</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">ниқоб</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">niqoʙ</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Tamil</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">முகமூடி</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">mukamūṭi</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Tatar</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">маска</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maska</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/maska/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Telugu</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">ముసుగు</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">musugu</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Thai</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">หน้ากาก</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">nâakàak</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/naː˥˩kaːk̚˨˩/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Turkish</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maske</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maske</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/mask̟ʰe/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Turkmen</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maska</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maska</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Ukrainian</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">маскувати</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maskuvaty</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/mɑskɐ/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Urdu</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">ماسک</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">mask</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Uyghur</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">mask</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">mask</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Uzbek</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">niqob</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">niqob</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Vietnamese</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">khẩu trang</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">khẩu trang</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/kʰəw˨˩˦ ʈaːŋ˧˧/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Welsh</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">mwgwd</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">mwgwd</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/mʊɡʊd/</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Xhosa</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">imaski</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">imaski</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Yiddish</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">מאַסקע</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maske</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Yoruba</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">boju-abẹ</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">boju-abẹ</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Zulu</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">imaski</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">imaski</td>
+      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+    </tr>
+  </tbody>
+  <tfoot class="gt_sourcenotes">
+    <tr>
+      <td class="gt_sourcenote" colspan="4">https://drive.google.com/file/d/18SeJTiM2-JXR9SOqEg22wdkvNL3OxG3u/view?usp=sharing</td>
+    </tr>
+  </tfoot>
+  
+</table></div>
+</div>
+<p>To compute the similarity of each pair of translation equivaelnts, I followed Floccia et al.’s (<a href="https://srcd.onlinelibrary.wiley.com/doi/10.1111/mono.12349">2018</a>) procedure. For each pair of translation equivalents, I computed their Levenshtein distance as the number of insertions, deletions and replacements a string character has to go through to become identical to the other, and then divided this value by the number of characters of the longest of the two strings, so that all values range between 0 and 1. To compute the Levenshtein distance, I used the <code>stringdist()</code> function of the <code>stringdist</code> R package.</p>
+<div id="orthographic-distance" class="section level2">
+<h2>Orthographic distance</h2>
+<p>I first computed the orthographic distance between each pair of translation equivalents. Since some word forms make use of different alphabets, I first romanised all word forms. By <em>romanised</em>, I mean that I searched for the transcription of each word form in the Roman alphabet, and used it as input to compute the Levenshtein distance for each pair of translation equivalents. Here’s how orthographically similar (the romanisations of) the translations of <em>mask</em> are (<em>N</em> = 110 pairs):</p>
+<p><img src="/img/masks_ort.png" /></p>
+</div>
+<div id="phonological-distance" class="section level2">
+<h2>Phonological distance</h2>
+<p>The phonological similarity/distance may be more informative. This time I searched for or generated with the help of a native speaker a phonological IPA transcription of each word-form. I then used this transcription as input to compute the phonological similarity of each pair of translation equivalents. A pitfall in this process is the fact that phonemes are almost never identical across languages, so even the common phoneme /m/ could vary slightly on its pronunciation in two languages. If this difference is encoded in the IPA transcription (as different characters), the Levenshtein distance will be inflated. For this reason, I simplified some IPA transcriptions to preserve this similarity. I also removed tones. This is terribly wrong from a linguistics perspective, but it’s the only way I see to be able to play with some reliable data. Also I’m no linguist, so you have no power here.</p>
+<p><img src="/img/power.gif" /></p>
+<p>Here’s the same analysis performed on phonological transcriptions of a subset of those languages (<em>N</em> = 75 pairs, those I could find a reliable IPA transcription for or could find help from a native speaker):</p>
+<p><img src="/img/masks_phon.png" /></p>
+</div>
+<div id="onsets" class="section level2">
+<h2>Onsets</h2>
+<p>Most of the times, the phonological overlap comes from onset graphemes/phonemes. This is how many word-forms start with each onset:</p>
+<p><img src="/img/masks_onset.png" /></p>
+</div>
+<div id="some-disclaimers" class="section level2">
+<h2>Some disclaimers:</h2>
+<p>I tried ensuring that words referred to <em>surgical</em> masks (instead of other types of masks) with help from native speakers. Wrong translations may still have slipped in (or be just wrong). I wish I had time to double-check all of them (I did this for fun).</p>
+<p>This analysis is probably affected by selection bias. I suspect many dissimilar translations are missing due to not being included in the translation apps I used (e.g. Google Translate). Feel free to contribute missing entries or make corrections!</p>
+</div>
+<div id="code-and-data" class="section level2">
+<h2>Code and data</h2>
+<script src="https://gist.github.com/gongcastro/c751a62245b17562e18d8a145d5950c6.js"></script>
+</div>
+<div id="session-info" class="section level2">
+<h2>Session info</h2>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>## R version 4.0.2 (2020-06-22)
+## Platform: x86_64-w64-mingw32/x64 (64-bit)
+## Running under: Windows 10 x64 (build 19041)
+## 
+## Matrix products: default
+## 
+## locale:
+## [1] LC_COLLATE=English_United States.1252 
+## [2] LC_CTYPE=English_United States.1252   
+## [3] LC_MONETARY=English_United States.1252
+## [4] LC_NUMERIC=C                          
+## [5] LC_TIME=English_United States.1252    
+## 
+## attached base packages:
+## [1] stats     graphics  grDevices utils     datasets  methods   base     
+## 
+## other attached packages:
+##  [1] htmltools_0.5.1  kableExtra_1.2.1 knitr_1.30       gt_0.2.2        
+##  [5] readxl_1.3.1     forcats_0.5.0    stringr_1.4.0    dplyr_1.0.2     
+##  [9] purrr_0.3.4      readr_1.4.0      tidyr_1.1.2      tibble_3.0.4    
+## [13] ggplot2_3.3.2    tidyverse_1.3.0 
+## 
+## loaded via a namespace (and not attached):
+##  [1] stringdist_0.9.6  tidyselect_1.1.0  xfun_0.20         haven_2.3.1      
+##  [5] colorspace_2.0-0  vctrs_0.3.6       generics_0.1.0    viridisLite_0.3.0
+##  [9] yaml_2.2.1        rlang_0.4.10      pillar_1.4.7      glue_1.4.2       
+## [13] withr_2.3.0       DBI_1.1.1.9000    dbplyr_2.0.0      modelr_0.1.8     
+## [17] lifecycle_0.2.0   commonmark_1.7    munsell_0.5.0     blogdown_1.1.4   
+## [21] gtable_0.3.0      cellranger_1.1.0  rvest_0.3.6       evaluate_0.14    
+## [25] ps_1.5.0          parallel_4.0.2    fansi_0.4.1       broom_0.7.1.9000 
+## [29] Rcpp_1.0.6        checkmate_2.0.0   scales_1.1.1      backports_1.2.1  
+## [33] webshot_0.5.2     jsonlite_1.7.2    fs_1.5.0          hms_0.5.3        
+## [37] digest_0.6.27     stringi_1.5.3     bookdown_0.21     grid_4.0.2       
+## [41] cli_2.2.0         tools_4.0.2       sass_0.2.0        magrittr_2.0.1   
+## [45] crayon_1.3.4      pkgconfig_2.0.3   ellipsis_0.3.1    xml2_1.3.2       
+## [49] reprex_0.3.0      lubridate_1.7.9.2 assertthat_0.2.1  rmarkdown_2.6    
+## [53] httr_1.4.2        rstudioapi_0.13   R6_2.5.0          compiler_4.0.2</code></pre>
+</div>
+]]></content>
+        </item>
+        
+        <item>
+            <title>Importing data from multiple files simultaneously in R</title>
+            <link>https://gongcastro.netlify.app/posts/2020/07/importing-data-from-multiple-files-simultaneously-in-r/</link>
+            <pubDate>Mon, 20 Jul 2020 00:00:00 +0000</pubDate>
+            
+            <guid>https://gongcastro.netlify.app/posts/2020/07/importing-data-from-multiple-files-simultaneously-in-r/</guid>
+            <description>TL;DRWe need to import several CSV or TXT files and merge them into one data frame in R. Regardless of what function we use to import the files, vectorising the operation using purrr::map in combination with do.call or dplyr::bind_rows is the most time-efficient method (~25 ms importing 50 files with 10,000 rows each), compared to for loops (~220ms) or using lapply (~123 ms). data.table::fread is the fastest function for importing data.</description>
+            <content type="html"><![CDATA[
+<script src="/rmarkdown-libs/header-attrs/header-attrs.js"></script>
+
+<div id="TOC">
+
+</div>
+
+<div id="tldr" class="section level2">
+<h2>TL;DR</h2>
+<blockquote>
+<p>We need to import several CSV or TXT files and merge them into one data frame in R. Regardless of what function we use to import the files, vectorising the operation using <code>purrr::map</code> in combination with <code>do.call</code> or <code>dplyr::bind_rows</code> is the most time-efficient method (~25 ms importing 50 files with 10,000 rows each), compared to <em>for loops</em> (~220ms) or using <code>lapply</code> (~123 ms). <code>data.table::fread</code> is the fastest function for importing data. Importing TXT files is slightly faster than importing CSV files.</p>
+</blockquote>
+</div>
+<div id="why-this-post" class="section level2">
+<h2>Why this post</h2>
+<p>To analyse data in any programming environment, one must first import some data. Sometimes, the data we want to analyse are distributed across several files in the same folder. I work with eye-tracking data from toddlers. This means that I work with multiple files that have many rows. At 120 Hz sampling frequency, we take ~8.33 samples per second. A session for one participants can take up to 10 minutes. So these files are somewhat big. These data also tend to be messy, requiring a lot of preprocessing. This means that I need to import the same large files many times during the same R session when wrangling my way through the data, which takes a few seconds. After some iterations, it can be annoying. I have decided to invest all my lost time into analysing what method for importing and merging large files is the fastest in R so that the universe and I are even again.</p>
+<p>Below I provide several options for importing data from the different files, using base R and tidyverse, among other tools. I will compare how long it takes to import and merge data using each method under different circumstances. You can find the whole code here in case you want to take a look, reproduce it or play with it<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>.</p>
+</div>
+<div id="how-can-i-import-large-files-and-merge-them" class="section level2">
+<h2>How can I import large files and merge them?</h2>
+<p>So we have some files in a folder. All files have the same number of columns, the same column names, and are in the same format. I assume that data are tabular (i.e., in the shape of a rectangle defined by rows and columns). I also assume that data are stored as Comma-Separated Values (.csv) or Tab-separated Text (.txt or .tsv), as these formats are the most reproducible.</p>
+<p>We to import all files and bind their rows together to form a unique long data frame. There are multiple combinations of functions we can use. Each function comes with a different package and does the job in different ways. Next, I will show some suggestions, but first let’s create some data. We are creating 50 datasets with 10 columns and 10,000 rows in .txt format. The variables included are numeric and made of 0s and 1s. There is also a column that identifies the data set. These files are created in a temporary directory using the <code>temp.dir</code> function for reproducibility. After closing you R session, this directory and all of its contents will disappear.</p>
+<pre class="r"><code>n &lt;- 50 # number of files/participants
+n_obs &lt;- 10000 # number of rows/observations in each file
+filenames &lt;- sprintf(&quot;dataset%03d&quot;, 1:n) # file names
+files &lt;- lapply(
+  as.list(filenames),
+  function(x) {
+    data.frame(dataset = x, replicate(10, sample(0:1, n_obs, rep = TRUE))) # create data sets
+  }
+)
+# export data sets as files
+dat &lt;- mapply(
+  function(x, y){
+    write.table(x, paste0(tempdir(), .Platform$file.sep, y,  &quot;.txt&quot;), sep = &quot;\t&quot;, dec = &quot;.&quot;, row.names = FALSE)
+  },
+  files, filenames
+)</code></pre>
+<div id="base-r-for-loops" class="section level3">
+<h3>Base R: for loops</h3>
+<p><em>for loops</em> are one of the fundamental skills in many programming languages. The idea behind <em>for loops</em> is quite intuitive: take a vector or list of length <em>n</em>, and apply a series of functions to each element in order. First, to element 1 and then to element 2, and so on, until we get to element <em>n</em>. Then, the loop ends. We will first make a vector with the paths of our files, and then apply the <code>read.delim</code> function to each element of the vector (i.e., to each path). Every time we import a file, we store the resulting data frame as an element of a list. After the loop finishes, we merge the rows of all element of the list using a combination of the functions <code>do.call</code> and <code>rbind</code>.</p>
+<pre class="r"><code>n &lt;- 20 # number of files
+filepaths &lt;- list.files(tempdir(), full.names = TRUE, pattern = &quot;.txt&quot;) # list files in folder
+dat &lt;- list() # pre-allocate the list of files
+for (i in 1:length(filepaths)){
+  dat[[i]] &lt;- read.delim(filepaths[i])
+}
+dat &lt;- do.call(rbind, dat) #  bind data frames together</code></pre>
+</div>
+<div id="base-r-lapply" class="section level3">
+<h3>Base R: <code>lapply</code></h3>
+<p>We will use the functions <code>read.delim</code> and <code>read.csv</code> in combination with the function <code>lapply</code>. The former are well known. The later is part of a family of functions (together with <code>sapply</code>, <code>mapply</code>, and some others I can’t remember) that take two arguments: a list and a function, which will be applied over each element of the list in parallel (i.e., in a vectorised way).</p>
+<pre class="r"><code>filepaths &lt;- list.files(tempdir(), full.names = TRUE, pattern = &quot;.txt&quot;)
+dat &lt;- lapply(filepaths, read.delim)
+dat &lt;- do.call(rbind, dat)</code></pre>
+</div>
+<div id="tidyverse" class="section level3">
+<h3>tidyverse</h3>
+<p>The tidyverse is a family of packages that suggests a workflow when working in R. The use of pipes (<code>%&gt;%</code>) is one of its signature moves, which allow you to chain several operations applied on the same object within the same block of code. In contrast, base R makes you choose between applying several functions to the same object in different blocks of code, or applying those functions in a nested way, so that the first functions you read are those applied the last to your object (e.g., <code>do.call(rbind, as.list(data.frame(x = "this is annoying", y = 1:100)))</code>). We will use a combination of the <code>dplyr</code> and <code>purrr</code> packages to import the files listed in a vector, using <code>read.delim</code> and <code>bind_rows</code>.</p>
+<pre class="r"><code>library(dplyr)</code></pre>
+<pre><code>## Warning: package &#39;dplyr&#39; was built under R version 4.0.3</code></pre>
+<pre class="r"><code>library(purrr)
+
+filepaths &lt;- list.files(tempdir(), full.names = TRUE, pattern = &quot;.txt&quot;)
+dat &lt;- map(filepaths, read.delim) %&gt;% 
+  bind_rows()</code></pre>
+</div>
+<div id="data.table" class="section level3">
+<h3><code>data.table</code></h3>
+<p>The function <code>rbindlist</code> function from the package <code>data.table</code> also allows to merge the datasets contained in a list. In combination with <code>fread</code> (from the same package), it can be very fast.</p>
+<pre class="r"><code>library(dplyr)
+library(data.table)
+
+filepaths &lt;- list.files(tempdir(), full.names = TRUE, pattern = &quot;.txt&quot;)
+dat &lt;- map(filepaths, fread) %&gt;% 
+  rbindlist()</code></pre>
+</div>
+</div>
+<div id="what-method-is-the-fastest" class="section level2">
+<h2>What method is the fastest?</h2>
+<p>I will compare how long each combination of importing, vectorising, and merging functions needs to import 50 data sets with 10 columns and 10,000 rows each. Additionally, I will compare the performance of each method when working with CSV (.csv) and TSV (.txt) files. For each method, I will repeat the process 100 times, measuring how long it takes from the moment we list the extant files in the folder to the moment we finish merging the data sets. Here are the results:</p>
+<div class="figure"><span id="fig:timesplot"></span>
+<img src="/posts/2020-07-20-importing-data-from-multiple-files-simultaneously-in-r/importing-data-from-multiple-files-simultaneously-in-r_files/figure-html/timesplot-1.png" alt="Mean time (and standard deviation) for each combination of methods and file formats across 100 replications" width="672" />
+<p class="caption">
+Figure 1: Mean time (and standard deviation) for each combination of methods and file formats across 100 replications
+</p>
+</div>
+<p>For more detail:</p>
+<style>html {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
+}
+
+#kflswphtdm .gt_table {
+  display: table;
+  border-collapse: collapse;
+  margin-left: auto;
+  margin-right: auto;
+  color: #FFFFFF;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #141414;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#kflswphtdm .gt_heading {
+  background-color: #141414;
+  text-align: center;
+  border-bottom-color: #141414;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#kflswphtdm .gt_title {
+  color: #FFFFFF;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  border-bottom-color: #141414;
+  border-bottom-width: 0;
+}
+
+#kflswphtdm .gt_subtitle {
+  color: #FFFFFF;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 0;
+  padding-bottom: 4px;
+  border-top-color: #141414;
+  border-top-width: 0;
+}
+
+#kflswphtdm .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#kflswphtdm .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#kflswphtdm .gt_col_heading {
+  color: #FFFFFF;
+  background-color: #141414;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#kflswphtdm .gt_column_spanner_outer {
+  color: #FFFFFF;
+  background-color: #141414;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#kflswphtdm .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#kflswphtdm .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#kflswphtdm .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#kflswphtdm .gt_group_heading {
+  padding: 8px;
+  color: #FFFFFF;
+  background-color: #3b3d42;
+  font-size: 100%;
+  font-weight: bold;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#kflswphtdm .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #FFFFFF;
+  background-color: #3b3d42;
+  font-size: 100%;
+  font-weight: bold;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#kflswphtdm .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#kflswphtdm .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#kflswphtdm .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#kflswphtdm .gt_stub {
+  color: #FFFFFF;
+  background-color: #141414;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 12px;
+}
+
+#kflswphtdm .gt_summary_row {
+  color: #FFFFFF;
+  background-color: #141414;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#kflswphtdm .gt_first_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+}
+
+#kflswphtdm .gt_grand_summary_row {
+  color: #FFFFFF;
+  background-color: #141414;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#kflswphtdm .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#kflswphtdm .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#kflswphtdm .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#kflswphtdm .gt_footnotes {
+  color: #FFFFFF;
+  background-color: #141414;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#kflswphtdm .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding: 4px;
+}
+
+#kflswphtdm .gt_sourcenotes {
+  color: #FFFFFF;
+  background-color: #141414;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#kflswphtdm .gt_sourcenote {
+  font-size: 90%;
+  padding: 4px;
+}
+
+#kflswphtdm .gt_left {
+  text-align: left;
+}
+
+#kflswphtdm .gt_center {
+  text-align: center;
+}
+
+#kflswphtdm .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#kflswphtdm .gt_font_normal {
+  font-weight: normal;
+}
+
+#kflswphtdm .gt_font_bold {
+  font-weight: bold;
+}
+
+#kflswphtdm .gt_font_italic {
+  font-style: italic;
+}
+
+#kflswphtdm .gt_super {
+  font-size: 65%;
+}
+
+#kflswphtdm .gt_footnote_marks {
+  font-style: italic;
+  font-size: 65%;
+}
+</style>
+<div id="kflswphtdm" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;"><table class="gt_table">
+  <thead class="gt_header">
+    <tr>
+      <th colspan="8" class="gt_heading gt_title gt_font_normal" style>Time taken to import and merge</th>
+    </tr>
+    <tr>
+      <th colspan="8" class="gt_heading gt_subtitle gt_font_normal gt_bottom_border" style>50 datasets with 10 columns and 10,000 rows each</th>
+    </tr>
+  </thead>
+  <thead class="gt_col_headings">
+    <tr>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1"></th>
+      <th class="gt_col_heading gt_center gt_columns_bottom_border" rowspan="2" colspan="1">package</th>
+      <th class="gt_center gt_columns_top_border gt_column_spanner_outer" rowspan="1" colspan="2">
+        <span class="gt_column_spanner"><strong>for loop</strong></span>
+      </th>
+      <th class="gt_center gt_columns_top_border gt_column_spanner_outer" rowspan="1" colspan="2">
+        <span class="gt_column_spanner"><strong>lapply</strong></span>
+      </th>
+      <th class="gt_center gt_columns_top_border gt_column_spanner_outer" rowspan="1" colspan="2">
+        <span class="gt_column_spanner"><strong>purrr::map</strong></span>
+      </th>
+    </tr>
+    <tr>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1"><em>M</em></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1"><em>SD</em></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1"><em>M</em></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1"><em>SD</em></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1"><em>M</em></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1"><em>SD</em></th>
+    </tr>
+  </thead>
+  <tbody class="gt_table_body">
+    <tr class="gt_group_heading_row">
+      <td colspan="8" class="gt_group_heading">do.call - .csv</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub"></td>
+      <td class="gt_row gt_left">base</td>
+      <td class="gt_row gt_right">1.34</td>
+      <td class="gt_row gt_right">0.06</td>
+      <td class="gt_row gt_right">1.11</td>
+      <td class="gt_row gt_right">0.07</td>
+      <td class="gt_row gt_right">0.15</td>
+      <td class="gt_row gt_right">0.03</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub"></td>
+      <td class="gt_row gt_left">data.table</td>
+      <td class="gt_row gt_right">1.33</td>
+      <td class="gt_row gt_right">0.39</td>
+      <td class="gt_row gt_right">0.88</td>
+      <td class="gt_row gt_right">0.04</td>
+      <td class="gt_row gt_right">0.17</td>
+      <td class="gt_row gt_right">0.02</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub"></td>
+      <td class="gt_row gt_left">readr</td>
+      <td class="gt_row gt_right">1.38</td>
+      <td class="gt_row gt_right">0.05</td>
+      <td class="gt_row gt_right">1.07</td>
+      <td class="gt_row gt_right">0.13</td>
+      <td class="gt_row gt_right">0.15</td>
+      <td class="gt_row gt_right">0.02</td>
+    </tr>
+    <tr class="gt_group_heading_row">
+      <td colspan="8" class="gt_group_heading">dplyr::bind_rows - .csv</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub"></td>
+      <td class="gt_row gt_left">base</td>
+      <td class="gt_row gt_right">1.35</td>
+      <td class="gt_row gt_right">0.16</td>
+      <td class="gt_row gt_right">0.99</td>
+      <td class="gt_row gt_right">0.14</td>
+      <td class="gt_row gt_right">0.15</td>
+      <td class="gt_row gt_right">0.01</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub"></td>
+      <td class="gt_row gt_left">data.table</td>
+      <td class="gt_row gt_right">1.14</td>
+      <td class="gt_row gt_right">0.04</td>
+      <td class="gt_row gt_right">0.84</td>
+      <td class="gt_row gt_right">0.06</td>
+      <td class="gt_row gt_right">0.16</td>
+      <td class="gt_row gt_right">0.01</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub"></td>
+      <td class="gt_row gt_left">readr</td>
+      <td class="gt_row gt_right">1.25</td>
+      <td class="gt_row gt_right">0.14</td>
+      <td class="gt_row gt_right">0.91</td>
+      <td class="gt_row gt_right">0.04</td>
+      <td class="gt_row gt_right">0.14</td>
+      <td class="gt_row gt_right">0.00</td>
+    </tr>
+    <tr class="gt_group_heading_row">
+      <td colspan="8" class="gt_group_heading">do.call - .txt</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub"></td>
+      <td class="gt_row gt_left">base</td>
+      <td class="gt_row gt_right">1.18</td>
+      <td class="gt_row gt_right">0.04</td>
+      <td class="gt_row gt_right">0.88</td>
+      <td class="gt_row gt_right">0.04</td>
+      <td class="gt_row gt_right">0.17</td>
+      <td class="gt_row gt_right">0.02</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub"></td>
+      <td class="gt_row gt_left">data.table</td>
+      <td class="gt_row gt_right">1.17</td>
+      <td class="gt_row gt_right">0.04</td>
+      <td class="gt_row gt_right">0.80</td>
+      <td class="gt_row gt_right">0.05</td>
+      <td class="gt_row gt_right">0.15</td>
+      <td class="gt_row gt_right">0.02</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub"></td>
+      <td class="gt_row gt_left">readr</td>
+      <td class="gt_row gt_right">1.18</td>
+      <td class="gt_row gt_right">0.05</td>
+      <td class="gt_row gt_right">0.80</td>
+      <td class="gt_row gt_right">0.05</td>
+      <td class="gt_row gt_right">0.15</td>
+      <td class="gt_row gt_right">0.02</td>
+    </tr>
+    <tr class="gt_group_heading_row">
+      <td colspan="8" class="gt_group_heading">dplyr::bind_rows - .txt</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub"></td>
+      <td class="gt_row gt_left">base</td>
+      <td class="gt_row gt_right">1.13</td>
+      <td class="gt_row gt_right">0.03</td>
+      <td class="gt_row gt_right">0.84</td>
+      <td class="gt_row gt_right">0.06</td>
+      <td class="gt_row gt_right">0.20</td>
+      <td class="gt_row gt_right">0.02</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub"></td>
+      <td class="gt_row gt_left">data.table</td>
+      <td class="gt_row gt_right">1.19</td>
+      <td class="gt_row gt_right">0.13</td>
+      <td class="gt_row gt_right">0.77</td>
+      <td class="gt_row gt_right">0.03</td>
+      <td class="gt_row gt_right">0.14</td>
+      <td class="gt_row gt_right">0.01</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub"></td>
+      <td class="gt_row gt_left">readr</td>
+      <td class="gt_row gt_right">1.13</td>
+      <td class="gt_row gt_right">0.04</td>
+      <td class="gt_row gt_right">0.77</td>
+      <td class="gt_row gt_right">0.03</td>
+      <td class="gt_row gt_right">0.14</td>
+      <td class="gt_row gt_right">0.01</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_stub gt_right gt_grand_summary_row gt_first_grand_summary_row">Mean</td>
+      <td class="gt_row gt_left gt_grand_summary_row gt_first_grand_summary_row">&mdash;</td>
+      <td class="gt_row gt_right gt_grand_summary_row gt_first_grand_summary_row">1.23</td>
+      <td class="gt_row gt_right gt_grand_summary_row gt_first_grand_summary_row">0.10</td>
+      <td class="gt_row gt_right gt_grand_summary_row gt_first_grand_summary_row">0.89</td>
+      <td class="gt_row gt_right gt_grand_summary_row gt_first_grand_summary_row">0.06</td>
+      <td class="gt_row gt_right gt_grand_summary_row gt_first_grand_summary_row">0.15</td>
+      <td class="gt_row gt_right gt_grand_summary_row gt_first_grand_summary_row">0.02</td>
+    </tr>
+  </tbody>
+  
+  
+</table></div>
+<p>Figure <a href="#fig:timesplot">1</a> and Table <a href="#tab:timestab"><strong>??</strong></a> show the detailed timings The grand mean average time taken by all methods is ~2.12 seconds, but there are some differences.</p>
+<ul>
+<li>It doesn’t really matter what function we use to merge data sets: both <code>do.call</code> and <code>dplyr::bind_rows</code> perform roughly similarly.</li>
+<li>What makes the biggest difference is what function we use to vectorise the importing operation across file names to import them. <code>purrr::map</code> is the fastest. Incredibly, is takes less than 0.3 seconds in all conditions. It is also the least sensitive to the format of the files and the function we use to import them.</li>
+<li>The next vectorising function in terms of temporal efficiency is <code>lapply</code>, which takes ~1.5 seconds. It performs slightly better when working with .txt files, in that when working with .csv files its performance depends on what method we use to import them: <code>data.table::fread</code> is much faster than its base and <code>readr</code> competitors. This <a href="https://www.danielecook.com/speeding-up-reading-and-writing-in-r/">post</a> by Daniele Cook sheds some light into the advantage of <code>data.table</code> over other importing functions, also covering the <code>vroom</code> package, which this post doesn’t cover.</li>
+<li>Using <em>for loops</em> looks like the least efficient method for iterating across data sets when importing data. It also shows a similar profile than <code>lapply</code>: <code>data.table::fread</code> performs a bit better than the rest.</li>
+</ul>
+</div>
+<div id="conclusion" class="section level2">
+<h2>Conclusion</h2>
+<p>Under the scenario under which I have simulated the data, it seems that using <code>purrr::map</code> in combination with <code>do.call</code> or <code>dplyr::bind_rows</code> to merge data sets is the most efficient method in terms of time. When using said combination, it doesn’t matter what function we use to import files, but <code>data.table::fread</code> seems like the best choice, as it is also the most flexible (take a look at the <a href="https://github.com/Rdatatable/data.table">documentation</a> of <code>data.table</code> to see all the features it offers).</p>
+<p>If I have time, I may add another two dimensions: number of rows in the files and number of files, although I dare say similar results are to be expected. If anything, I would say that differences may become greater as file size and number of files increase. Also, it would be interesting to test if pre-allocating the elements of the vector in the for loop speeds up the process (see here what I mean). We shall see.</p>
+<p>Hope this was useful, if not interesting!</p>
+</div>
+<div id="code" class="section level2">
+<h2>Code</h2>
+<script src="https://gist.github.com/gongcastro/35aa0ae28380fc0ff48c7df71b387b20.js"></script>
+</div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>Ironically, this code is super inefficient and messy. It takes ages to run, and has been written by copy-pasting multiple times. I didn’t feel like doing anything more elegant. Also, I don’t know how. Help yourself.<a href="#fnref1" class="footnote-back">↩︎</a></p></li>
+</ol>
+</div>
+]]></content>
+        </item>
+        
+    </channel>
+</rss>

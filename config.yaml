@@ -1,4 +1,4 @@
-baseURL: https://example.com/
+baseURL: https://gongcastro.netlify.app
 title: Gonzalo Garcia-Castro
 DefaultContentLanguage: en
 theme: hugo-theme-hello-friend-ng
