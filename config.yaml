@@ -1,0 +1,82 @@
+baseURL: https://example.com/
+title: Gonzalo Garcia-Castro
+DefaultContentLanguage: en
+theme: hugo-theme-hello-friend-ng
+PygmentsCodeFences: yes
+PygmentsStyle: monokai
+rssLimit: 10
+copyright: This work is licensed under a Creative Commons Attribution-NonCommercial
+  4.0 International License.
+archetypeDir: archetypes
+contentDir: content
+dataDir: data
+layoutDir: layouts
+publishDir: public
+buildDrafts: no
+buildFuture: no
+buildExpored: no
+canonifyURLs: yes
+enableRobotsTXT: yes
+enableGitInfo: no
+enableEmoji: yes
+enableMissingTranslationPlaceholders: no
+disableRSS: no
+disableSitemap: no
+disable404: no
+disableHugoGeneratorInject: no
+permalinks:
+  posts: /posts/:year/:month/:title/
+author:
+  name: Gonzalo Garcia-Castro
+blackfriday:
+  hrefTargetBlank: yes
+taxonomies:
+  category: ''
+  tag: tags
+params:
+  contentTypeName: posts
+  customCSS: []
+  customJS: []
+  dateform: Jan 2, 2006
+  dateformNum: '2006-01-02'
+  dateformNumTime: 2006-01-02 15:04 -0700
+  dateformShort: Jan 2
+  defaultTheme: dark
+  description: Nice theme for homepages and blogs
+  homeSubtitle: Hello Friend NG
+  images: ''
+  justifyContent: no
+  keywords: 'Developmental psychology, psycholonguistics, Rstats'
+  logo:
+    logoHomeLink: /
+    logoText: $ cd /gongcastro/
+  social:
+    - name: twitter
+      url: https://twitter.com/gongcastro
+    - name: email
+      url: mailto:gonzalo.garciadecastro@upf.edu
+    - name: github
+      url: https://github.com/gongcastro
+  themeColor: '#252627'
+languages:
+  en:
+    copyright: <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank"
+      rel="noopener">CC BY-NC 4.0</a>
+    subtitle: Hello Friend NG Theme
+    weight: 1
+  fr:
+    copyright: <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank"
+      rel="noopener">CC BY-NC 4.0</a>
+    subtitle: Hello Friend NG Theme
+    weight: 2
+menu:
+  main:
+    - identifier: about
+      name: About
+      url: about/
+    - identifier: posts
+      name: Posts
+      url: posts/
+    - identifier: cv
+      name: CV
+      url: cv/
