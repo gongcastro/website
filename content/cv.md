@@ -9,10 +9,6 @@ date: "2020-03-015"
 title: CV
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
 ## Education
 
 October 2018 - Present
