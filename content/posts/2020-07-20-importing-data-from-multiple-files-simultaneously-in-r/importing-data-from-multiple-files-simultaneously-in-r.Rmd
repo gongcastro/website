@@ -125,20 +125,24 @@ ggplot(dat, aes(package, mean, colour = vectorisation, shape = format)) +
   scale_colour_manual(values = c("red", "#e8b941", "#42b3f5")) +
   scale_y_continuous(breaks = seq(0, 1.5, by = 0.5)) +
   theme_bw() +
-  theme(text = element_text(size = 12),
-        axis.title = element_text(face = "bold", colour = "#e8b941"),
-        axis.text = element_text(colour = "white", size = 12),
-        panel.grid = element_line(colour = "grey"),
-        panel.grid.major.x = element_blank(),
-        panel.grid.minor.x = element_blank(),
-        legend.position = "top",
-        legend.box = "vertical",
-        legend.background = element_rect(fill = "#141414"),
-        legend.title = element_text(colour = "#e8b941", face = "bold"),
-        legend.key = element_rect(fill = "#3b3d42"),
-        legend.text = element_text(colour = "white", size = 12),
-        panel.background = element_rect(fill = "#3b3d42"),
-        plot.background = element_rect(fill = "#141414", colour = "#141414"))
+  theme(
+    axis.title = element_text(face = "bold"),
+    axis.text = element_text(colour = "black", size = 20),
+    panel.grid = element_line(colour = "grey"),
+    panel.grid.minor.x = element_blank(),
+    panel.grid.minor.y = element_blank(),
+    panel.grid.major.x = element_blank(),
+    strip.text = element_text(size = 15),
+    legend.position = "top",
+    legend.box = "vertical",
+    legend.background = element_rect(fill = "transparent"),
+    legend.title = element_text(face = "bold"),
+    legend.text = element_text(size = 14),
+    text = element_text(size = 25),
+    legend.key = element_rect(colour = "grey"),
+    panel.background = element_rect(fill = "white"),
+    plot.background = element_rect(fill = "white", colour = "white")
+  )
 
 ```
 For more detail:

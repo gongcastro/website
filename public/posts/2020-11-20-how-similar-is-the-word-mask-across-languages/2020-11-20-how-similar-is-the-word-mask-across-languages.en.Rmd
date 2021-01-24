@@ -53,8 +53,8 @@ t <- dat %>%
   ) %>% 
   tab_style(
     style = list(
-      cell_fill(color = "#141414"),
-      cell_text(color = "white")
+      cell_fill(color = "transparent"),
+      cell_text(color = "black")
     ),
     locations = cells_body()
   ) %>% 

@@ -5,8 +5,103 @@
         <description>Recent content in Posts on Gonzalo Garcia-Castro</description>
         <generator>Hugo -- gohugo.io</generator>
         <copyright>&lt;a href=&#34;https://creativecommons.org/licenses/by-nc/4.0/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;CC BY-NC 4.0&lt;/a&gt;</copyright>
-        <lastBuildDate>Fri, 20 Nov 2020 00:00:00 +0000</lastBuildDate>
+        <lastBuildDate>Thu, 21 Jan 2021 00:00:00 +0000</lastBuildDate>
         <atom:link href="https://gongcastro.netlify.app/posts/index.xml" rel="self" type="application/rss+xml" />
+        
+        <item>
+            <title>Visualising polynomial regression</title>
+            <link>https://gongcastro.netlify.app/posts/2021/01/visualising-polynomial-regression/</link>
+            <pubDate>Thu, 21 Jan 2021 00:00:00 +0000</pubDate>
+            
+            <guid>https://gongcastro.netlify.app/posts/2021/01/visualising-polynomial-regression/</guid>
+            <description>TL;DRThe outputs of polynomial regression can be difficult to interpret. I generated some animated plots to see how model predictions change across different combinations of coefficients for 1st, 2nd, and 3rd degree polynomials.
+Why polynomialsWhen modelling data using regression, sometimes the relationship between input variables and output variables is not very well captured by a straight line. A standard linear model is defined by the equation</description>
+            <content type="html"><![CDATA[
+<script src="/rmarkdown-libs/header-attrs/header-attrs.js"></script>
+
+<div id="TOC">
+
+</div>
+
+<div id="tldr" class="section level2">
+<h2>TL;DR</h2>
+<blockquote>
+<p>The outputs of polynomial regression can be difficult to interpret. I generated some animated plots to see how model predictions change across different combinations of coefficients for 1st, 2nd, and 3rd degree polynomials.</p>
+</blockquote>
+</div>
+<div id="why-polynomials" class="section level2">
+<h2>Why polynomials</h2>
+<p>When modelling data using regression, sometimes the relationship between input variables and output variables is not very well captured by a straight line. A standard linear model is defined by the equation</p>
+<p><span class="math display">\[y_i = \beta_{0} + \beta_{1}x_{i}\]</span></p>
+<p>where <span class="math inline">\(\beta_{0}\)</span> is the <strong>intercept</strong> (the value of the input variable <span class="math inline">\(x\)</span> where the output variable <span class="math inline">\(y=0\)</span>), and where <span class="math inline">\(\beta_{1}\)</span> is the <strong>coefficient</strong> of the input variable (how much <span class="math inline">\(y\)</span> increases for every unit increase in <span class="math inline">\(x\)</span>). To illustrate this, let’s imagine we are curious abut what proportion of the students in a classroom are paying attention, and how this proportion changes as minutes pass. We could formalise our model as</p>
+<p><span class="math inline">\(y_i = \beta_{0} + \beta_{1} Time_i\)</span>.</p>
+<p>Let’s generate some data to illustrate this example. Let’s say that, at the beginning of the lesson, almost 100% of the students are paying attention, but that after some time stop paying attention. Right before the end of the class, students start paying attention again.</p>
+<p><img src="/posts/2021-01-21-visualising-polynomial-regression/2021-01-21-visualising-polynomial-regression.en_files/attention.png" /></p>
+<p>The attention paid by the students did not decay linearly, but first dropped and rose up again, following a curvilinear trend. In these cases, we may want to perform some transformation on some input variables to account for this non-linear relationship. One of these transformations are <strong>polynomial transformations</strong>. In this context, when we talk about applying a polynomial function to a set of values, we usually mean exponentiating it by a positive number larger than 1. The power by which we exponentiate our variable defines the degree of the polynomial we are obtaining. Exponentiating our variable to the power of 2 will give us its second-degree polynomial. Exponentiating it by 3 will give us its third-degree polynomial, and so on. Back to our classroom example, we could add a new term to our regression equation: the second-degree polynomial of the input variable <span class="math inline">\(Time\)</span>, or even a third degree polynomial if we wanted to test to what extend our model follows a more complex pattern. Our regression trend will not be linear any more, but curvilinear. Let’s take a look at the anatomy of polynomials from a visual (and very informal perspective). Our model would look like this:</p>
+<p><span class="math display">\[
+y_i = \beta_{0} + \beta_{1} Time_i + \beta_{2} Time_{i}^2 + \beta_{3} Time_{i}^3
+\]</span></p>
+<p>Adding polynomial terms to our regression offers much flexibility to researchers when modelling this kind of associations between input and output variables. This practice is, for example, common in Cognitive Science when analysing <strong>repeated measures</strong> data such as eye-tracking data, where we register what participants fixated in a screen during a trial under several conditions. Polynomial regression could be considered as of the main techniques in the more general category of <strong>Growth Curve Analyis</strong> (GCA) methods. If you are interested in learning GCA, you should take a look at Daniel Mirman’s “Growth Curve Analysis and Visualization Using R” [<a href="https://www.routledge.com/Growth-Curve-Analysis-and-Visualization-Using-R/Mirman/p/book/9781466584327">book</a>].</p>
+<p>Powerful as this technique is, it presents some pitfalls, especially to newbies like me. For instance, <strong>interpreting the outputs</strong> of a regression model that includes polynomials can tricky. In our example, depending on the values of the coefficients <span class="math inline">\(\beta_{1}\)</span>, <span class="math inline">\(\beta_2\)</span> and <span class="math inline">\(\beta_3\)</span>–the first-degree and second-degree polynomials of <span class="math inline">\(Time\)</span>–the shape of the resulting curve will be different. The combination of values that these two coefficient can take is infinite, and so is the number of potential shapes our curve can adopt. Interpreting how the values of these coefficients affect the shape of our model, and more importantly, their interaction with other predictors of interest in the model can be difficult without any kind of <strong>visualisation.</strong> The aim of this post is to visualise how the regression lines of a regression model changes with the degree of its polynomials. For computational constraints, and to make visualisation easier, I will only cover one, two, and three-degree polynomials. I will generate plots for multiple combinations of the coefficients of these polynomials using the base R function <code>poly()</code> to generate polynomials, the R package <code>ggplot2()</code> to generate plots, and the <code>gganimate</code> R package to animate the plots. I will briefly describe what is going on in each plot, but I hope the figures are themselves more informative than anything I can say about them!</p>
+</div>
+<div id="intercept" class="section level2">
+<h2>Intercept</h2>
+<p>First, let’s start with how the value of the <strong>intercept</strong> (<span class="math inline">\(\beta_0\)</span>) changes the regression line for polynomials of different degree (1st, 2nd, and 3rd). I set the rest of the coefficients to arbitrary values for simplicity (<span class="math inline">\(\beta_1 = \beta_2 = \beta_3 = 1\)</span>). As you can see, regardless of the order of the polynomials involved in the model, increasing the intercept makes the line be higher in the Y-axis, and decreasing the value of the intercept make the line be lower in the Y-axis. Simple as that.</p>
+<p><img src="/posts/2021-01-21-visualising-polynomial-regression/2021-01-21-visualising-polynomial-regression.en_files/intercept.gif" /></p>
+<p>Thus, the interpretation of the intercept is similar to how do interpret it in standard linear regression models. It tells us the value of <span class="math inline">\(y\)</span> when all other coefficients are set to 0. As we will discuss later, what that means depends on what that zero means for the other coefficients, that is, how we coded them. For now, let’s cotinue adding more terms to the equation.</p>
+</div>
+<div id="linear-term-adding-a-1st-order-polynomial" class="section level2">
+<h2>Linear term: adding a 1st-order polynomial</h2>
+<p>Now let’s see how a linear model (with only a 1st degree polynomial) changes as we vary the value of <span class="math inline">\(\beta_1\)</span>, the coefficient of the linear term <span class="math inline">\(Time\)</span>. As you can see, nothing special happens, the line just gets steeper, meaning that for every unit increase in <span class="math inline">\(x\)</span>, <span class="math inline">\(y\)</span> increases (or decreases, depending on the sign) in <span class="math inline">\(\beta_1\)</span> units. When the coefficient equals zero, there is no increase nor decrease in <span class="math inline">\(y\)</span> for any change in <span class="math inline">\(x\)</span>.</p>
+<p><img src="/posts/2021-01-21-visualising-polynomial-regression/2021-01-21-visualising-polynomial-regression.en_files/linear.gif" /></p>
+<p>When <span class="math inline">\(\beta_1=0\)</span>, the resulting line is completely horizontal, parallel to the X-axis. This is what a model with just an intercept (<span class="math inline">\(y = \beta_{0}\)</span>) would look like. We generalise this to say that the linear model we just visualised is exactly the same as adding a 2nd and a 3rd degree polynomial to the model with their correspondent coefficients set to zero (<span class="math inline">\(\beta_2 = 0\)</span> and <span class="math inline">\(`\beta_3 = 0\)</span>, respectively).</p>
+</div>
+<div id="quadratic-adding-a-2nd-order-polynomial" class="section level2">
+<h2>Quadratic: adding a 2nd-order polynomial</h2>
+<p>Now things get a bit more interesting. When we add a second order polynomial (<span class="math inline">\(Time^2\)</span>), the line is not linear any more. If the coefficient of the 2nd-order polynomial (<span class="math inline">\(\beta_2\)</span>) is positive, the curve will go down and up in that order. When <span class="math inline">\(\beta_2 &lt; 0\)</span>, the curve goes up and then down. When <span class="math inline">\(\beta_2 = 0\)</span>, the curve turns out the be a line whose slope is defined by <span class="math inline">\(\beta_1\)</span>, just like in the previous example.</p>
+<p><img src="/posts/2021-01-21-visualising-polynomial-regression/2021-01-21-visualising-polynomial-regression.en_files/quadratic.gif" /></p>
+<p>Importantly, varying the value of the coefficient of 1st-order polynomials (<span class="math inline">\(\beta_1\)</span>) also changes the shape of the curve: more positive values of <span class="math inline">\(\beta_1\)</span> make the curve “fold” at higher values of <span class="math inline">\(x\)</span>. As you can see, when <span class="math inline">\(\beta_1 &lt; 0\)</span> (left panel, in blue), the point at which the curve starts increasing or decreasing occurs more to the left. When <span class="math inline">\(\beta_2 &gt; 0\)</span>, this change occurs more to the right.</p>
+</div>
+<div id="cubic-adding-a-3rd-order-polynomial" class="section level2">
+<h2>Cubic: adding a 3rd-order polynomial</h2>
+<p>Finally, let’s complicate things a bit more by adding a third-order polynomial. Now the curve will “fold” two times. As in the previous example, it’s the value of <span class="math inline">\(\beta_2\)</span> (the coefficient of the 2nd order polynomial) that determines whether the curve goes down-up-down or up-down-up, depending on whether <span class="math inline">\(\beta_2 &lt; 0\)</span> (<em>up-down-up</em>) or <span class="math inline">\(\beta_2 &gt; 0\)</span> (<em>down-up-down</em>). how larger the value of the coefficient of the 3rd-order polynomial is (regardless of whether it’s positive or negative) determines, for both “folding” points, how quickly the curve rises after dropping (if <span class="math inline">\(\beta_2 &gt; 0\)</span>), or how how quickly it drops after rising (if <span class="math inline">\(\beta_2 &lt; 0\)</span>). Finally, the value of <span class="math inline">\(\beta_1\)</span> changes the value of <span class="math inline">\(x\)</span> at which the curve folds. More negative values of <span class="math inline">\(\beta_1\)</span> make the curve fold at lower values of <span class="math inline">\(x\)</span>, while more positive values of <span class="math inline">\(\beta_1\)</span> make the curve fold at higher values of <span class="math inline">\(x\)</span>.</p>
+<p><img src="/posts/2021-01-21-visualising-polynomial-regression/2021-01-21-visualising-polynomial-regression.en_files/cubic.gif" /></p>
+</div>
+<div id="conclusion" class="section level2">
+<h2>Conclusion</h2>
+<p>There are way more things to say about polynomial regression, and its’s more than likely that I sacrifice accuracy for simplicity. After all, the aim of generating these animations was helping myself understand the outpus of polynomial models a bit more easily in the futur. I hope it helps other stoo. If you consider something is misleading or unaccurate, please let me know! I’m the first interested in getting it right. Cheers!</p>
+</div>
+<div id="just-the-code" class="section level2">
+<h2>Just the code</h2>
+<script src="https://gist.github.com/gongcastro/9eb9e0c7e7502b48514514fef83fc509.js"></script>
+</div>
+<div id="session-info" class="section level2">
+<h2>Session info</h2>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>## R version 4.0.2 (2020-06-22)
+## Platform: x86_64-w64-mingw32/x64 (64-bit)
+## Running under: Windows 10 x64 (build 19041)
+## 
+## Matrix products: default
+## 
+## locale:
+## [1] LC_COLLATE=English_United States.1252 
+## [2] LC_CTYPE=English_United States.1252   
+## [3] LC_MONETARY=English_United States.1252
+## [4] LC_NUMERIC=C                          
+## [5] LC_TIME=English_United States.1252    
+## 
+## attached base packages:
+## [1] stats     graphics  grDevices utils     datasets  methods   base     
+## 
+## loaded via a namespace (and not attached):
+##  [1] compiler_4.0.2  magrittr_2.0.1  bookdown_0.21   tools_4.0.2    
+##  [5] htmltools_0.5.1 yaml_2.2.1      stringi_1.5.3   rmarkdown_2.6  
+##  [9] blogdown_1.1.4  knitr_1.30      stringr_1.4.0   digest_0.6.27  
+## [13] xfun_0.20       rlang_0.4.10    evaluate_0.14</code></pre>
+</div>
+]]></content>
+        </item>
         
         <item>
             <title>How similar is the word &#34;mask&#34; across languages?</title>
@@ -37,7 +132,7 @@ The ubiquity of <a href="https://twitter.com/hashtag/masks?src=hash&amp;ref_src=
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
 }
 
-#qqmubyzyhv .gt_table {
+#ippulgwwad .gt_table {
   display: table;
   border-collapse: collapse;
   margin-left: auto;
@@ -62,7 +157,7 @@ The ubiquity of <a href="https://twitter.com/hashtag/masks?src=hash&amp;ref_src=
   border-left-color: #D3D3D3;
 }
 
-#qqmubyzyhv .gt_heading {
+#ippulgwwad .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -74,7 +169,7 @@ The ubiquity of <a href="https://twitter.com/hashtag/masks?src=hash&amp;ref_src=
   border-right-color: #D3D3D3;
 }
 
-#qqmubyzyhv .gt_title {
+#ippulgwwad .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -84,7 +179,7 @@ The ubiquity of <a href="https://twitter.com/hashtag/masks?src=hash&amp;ref_src=
   border-bottom-width: 0;
 }
 
-#qqmubyzyhv .gt_subtitle {
+#ippulgwwad .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -94,13 +189,13 @@ The ubiquity of <a href="https://twitter.com/hashtag/masks?src=hash&amp;ref_src=
   border-top-width: 0;
 }
 
-#qqmubyzyhv .gt_bottom_border {
+#ippulgwwad .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#qqmubyzyhv .gt_col_headings {
+#ippulgwwad .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -115,7 +210,7 @@ The ubiquity of <a href="https://twitter.com/hashtag/masks?src=hash&amp;ref_src=
   border-right-color: #D3D3D3;
 }
 
-#qqmubyzyhv .gt_col_heading {
+#ippulgwwad .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -135,7 +230,7 @@ The ubiquity of <a href="https://twitter.com/hashtag/masks?src=hash&amp;ref_src=
   overflow-x: hidden;
 }
 
-#qqmubyzyhv .gt_column_spanner_outer {
+#ippulgwwad .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -147,15 +242,15 @@ The ubiquity of <a href="https://twitter.com/hashtag/masks?src=hash&amp;ref_src=
   padding-right: 4px;
 }
 
-#qqmubyzyhv .gt_column_spanner_outer:first-child {
+#ippulgwwad .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#qqmubyzyhv .gt_column_spanner_outer:last-child {
+#ippulgwwad .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#qqmubyzyhv .gt_column_spanner {
+#ippulgwwad .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -167,7 +262,7 @@ The ubiquity of <a href="https://twitter.com/hashtag/masks?src=hash&amp;ref_src=
   width: 100%;
 }
 
-#qqmubyzyhv .gt_group_heading {
+#ippulgwwad .gt_group_heading {
   padding: 8px;
   color: #333333;
   background-color: #FFFFFF;
@@ -189,7 +284,7 @@ The ubiquity of <a href="https://twitter.com/hashtag/masks?src=hash&amp;ref_src=
   vertical-align: middle;
 }
 
-#qqmubyzyhv .gt_empty_group_heading {
+#ippulgwwad .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -204,15 +299,15 @@ The ubiquity of <a href="https://twitter.com/hashtag/masks?src=hash&amp;ref_src=
   vertical-align: middle;
 }
 
-#qqmubyzyhv .gt_from_md > :first-child {
+#ippulgwwad .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#qqmubyzyhv .gt_from_md > :last-child {
+#ippulgwwad .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#qqmubyzyhv .gt_row {
+#ippulgwwad .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -231,7 +326,7 @@ The ubiquity of <a href="https://twitter.com/hashtag/masks?src=hash&amp;ref_src=
   overflow-x: hidden;
 }
 
-#qqmubyzyhv .gt_stub {
+#ippulgwwad .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -243,7 +338,7 @@ The ubiquity of <a href="https://twitter.com/hashtag/masks?src=hash&amp;ref_src=
   padding-left: 12px;
 }
 
-#qqmubyzyhv .gt_summary_row {
+#ippulgwwad .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -253,7 +348,7 @@ The ubiquity of <a href="https://twitter.com/hashtag/masks?src=hash&amp;ref_src=
   padding-right: 5px;
 }
 
-#qqmubyzyhv .gt_first_summary_row {
+#ippulgwwad .gt_first_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -263,7 +358,7 @@ The ubiquity of <a href="https://twitter.com/hashtag/masks?src=hash&amp;ref_src=
   border-top-color: #D3D3D3;
 }
 
-#qqmubyzyhv .gt_grand_summary_row {
+#ippulgwwad .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -273,7 +368,7 @@ The ubiquity of <a href="https://twitter.com/hashtag/masks?src=hash&amp;ref_src=
   padding-right: 5px;
 }
 
-#qqmubyzyhv .gt_first_grand_summary_row {
+#ippulgwwad .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -283,11 +378,11 @@ The ubiquity of <a href="https://twitter.com/hashtag/masks?src=hash&amp;ref_src=
   border-top-color: #D3D3D3;
 }
 
-#qqmubyzyhv .gt_striped {
+#ippulgwwad .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#qqmubyzyhv .gt_table_body {
+#ippulgwwad .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -296,7 +391,7 @@ The ubiquity of <a href="https://twitter.com/hashtag/masks?src=hash&amp;ref_src=
   border-bottom-color: #D3D3D3;
 }
 
-#qqmubyzyhv .gt_footnotes {
+#ippulgwwad .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -310,13 +405,13 @@ The ubiquity of <a href="https://twitter.com/hashtag/masks?src=hash&amp;ref_src=
   border-right-color: #D3D3D3;
 }
 
-#qqmubyzyhv .gt_footnote {
+#ippulgwwad .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding: 4px;
 }
 
-#qqmubyzyhv .gt_sourcenotes {
+#ippulgwwad .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -330,46 +425,46 @@ The ubiquity of <a href="https://twitter.com/hashtag/masks?src=hash&amp;ref_src=
   border-right-color: #D3D3D3;
 }
 
-#qqmubyzyhv .gt_sourcenote {
+#ippulgwwad .gt_sourcenote {
   font-size: 90%;
   padding: 4px;
 }
 
-#qqmubyzyhv .gt_left {
+#ippulgwwad .gt_left {
   text-align: left;
 }
 
-#qqmubyzyhv .gt_center {
+#ippulgwwad .gt_center {
   text-align: center;
 }
 
-#qqmubyzyhv .gt_right {
+#ippulgwwad .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#qqmubyzyhv .gt_font_normal {
+#ippulgwwad .gt_font_normal {
   font-weight: normal;
 }
 
-#qqmubyzyhv .gt_font_bold {
+#ippulgwwad .gt_font_bold {
   font-weight: bold;
 }
 
-#qqmubyzyhv .gt_font_italic {
+#ippulgwwad .gt_font_italic {
   font-style: italic;
 }
 
-#qqmubyzyhv .gt_super {
+#ippulgwwad .gt_super {
   font-size: 65%;
 }
 
-#qqmubyzyhv .gt_footnote_marks {
+#ippulgwwad .gt_footnote_marks {
   font-style: italic;
   font-size: 65%;
 }
 </style>
-<div id="qqmubyzyhv" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;"><table class="gt_table">
+<div id="ippulgwwad" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;"><table class="gt_table">
   
   <thead class="gt_col_headings">
     <tr>
@@ -381,664 +476,664 @@ The ubiquity of <a href="https://twitter.com/hashtag/masks?src=hash&amp;ref_src=
   </thead>
   <tbody class="gt_table_body">
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Afrikaans</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">masker</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">masker</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/mɑːsk/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Afrikaans</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">masker</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">masker</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/mɑːsk/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Albanian</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maskë</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maskë</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/maskaɾiʝa/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Albanian</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">maskë</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">maskë</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/maskaɾiʝa/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Amharic</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">ጭምብል</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">ch'imibili</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/tʃ'imibili/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Amharic</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">ጭምብል</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">ch'imibili</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/tʃ'imibili/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Arabic</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">قناع</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">qunae</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/qinaːʕ/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Arabic</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">قناع</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">qunae</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/qinaːʕ/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Armenian</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">դիմակ</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">dimak</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/dimɑk/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Armenian</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">դիմակ</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">dimak</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/dimɑk/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Azerbaijani</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maska</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maska</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/maska/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Azerbaijani</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">maska</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">maska</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/maska/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Bangla</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">মুখোশ</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">mukhosh</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Bangla</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">মুখোশ</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">mukhosh</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">-</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Basque</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maskara</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maskara</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/maskaɾa/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Basque</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">maskara</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">maskara</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/maskaɾa/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Belarusian</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">маска</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maska</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/maska/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Belarusian</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">маска</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">maska</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/maska/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Bengali</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">মাস্ক</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">māska</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/mask/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Bengali</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">মাস্ক</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">māska</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/mask/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Bosnian</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maska</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maska</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/maska/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Bosnian</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">maska</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">maska</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/maska/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Bulgarian</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">маска</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maska</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/maskə/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Bulgarian</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">маска</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">maska</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/maskə/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Catalan</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">mascareta</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">mascareta</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/məskəɾɛtə/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Catalan</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">mascareta</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">mascareta</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/məskəɾɛtə/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Cebuano</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maskara</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maskara</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/maskaɾa/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Cebuano</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">maskara</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">maskara</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/maskaɾa/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Chichewa</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">amabisa</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">amabisa</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/amaɓisa/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Chichewa</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">amabisa</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">amabisa</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/amaɓisa/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Chinese Simplified</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">手术口罩</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">shǒushù kǒuzhào</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/ʂə̌uʂʷù kʰə̌uʈʂàu/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Chinese Simplified</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">手术口罩</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">shǒushù kǒuzhào</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/ʂə̌uʂʷù kʰə̌uʈʂàu/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Chinese Traditional</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">手術口罩</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">shǒushù kǒuzhào</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/ʂə̌uʂʷù kʰə̌uʈʂàu/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Chinese Traditional</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">手術口罩</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">shǒushù kǒuzhào</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/ʂə̌uʂʷù kʰə̌uʈʂàu/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Corsican</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maschera</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maschera</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/maskeɾa/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Corsican</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">maschera</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">maschera</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/maskeɾa/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Croatian</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maska</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maska</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/màska/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Croatian</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">maska</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">maska</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/màska/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Czech</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maska</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maska</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/maska/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Czech</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">maska</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">maska</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/maska/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Danish</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maske</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maske</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/masgə  /</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Danish</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">maske</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">maske</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/masgə  /</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Dutch</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">masker</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">masker</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/mɑskər/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Dutch</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">masker</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">masker</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/mɑskər/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">English</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">mask</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">mask</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/mɑːsk/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">English</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">mask</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">mask</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/mɑːsk/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Esperanto</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">masko</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">masko</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/masko/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Esperanto</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">masko</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">masko</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/masko/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Estonian</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">naamio</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">naamio</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/naːmio/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Estonian</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">naamio</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">naamio</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/naːmio/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Tagalog (Filipino)</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maskara</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maskara</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/maskaɾa/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Tagalog (Filipino)</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">maskara</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">maskara</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/maskaɾa/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Finnish (Suomi)</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">naamio</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">naamio</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/nɑːmio/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Finnish (Suomi)</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">naamio</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">naamio</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/nɑːmio/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Finnish (Suomi)</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maskara</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maskara</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/mɑskɑrɑ/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Finnish (Suomi)</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">maskara</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">maskara</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/mɑskɑrɑ/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Finnish (Suomi)</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">ripsiväri</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">ripsiväri</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/ripsiˌʋæri/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Finnish (Suomi)</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">ripsiväri</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">ripsiväri</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/ripsiˌʋæri/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">French</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">masque</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">masque</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/mɑːsk/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">French</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">masque</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">masque</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/mɑːsk/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Frisian</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">masker</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">masker</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/masker/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Frisian</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">masker</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">masker</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/masker/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Galician</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">máscara</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">máscara</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/maskaɾa/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Galician</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">máscara</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">máscara</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/maskaɾa/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Georgian</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">ნიღაბი</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">nighabi</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/niɣɑbi/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Georgian</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">ნიღაბი</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">nighabi</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/niɣɑbi/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">German</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Maske</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maske</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/maskə/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">German</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Maske</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">maske</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/maskə/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Greek</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">μάσκα</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">máska</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/maska/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Greek</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">μάσκα</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">máska</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/maska/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Gujarati</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">મહોરું</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">mahorũ</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Gujarati</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">મહોરું</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">mahorũ</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">-</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Hausa</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">abin rufe fuska</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">abin rufe fuska</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Hausa</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">abin rufe fuska</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">abin rufe fuska</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">-</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Hawaiian</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">pale maka</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">pale maka</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Hawaiian</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">pale maka</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">pale maka</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">-</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Hebrew</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">מסכה</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">masekháh</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Hebrew</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">מסכה</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">masekháh</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">-</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Hindi</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">मुखौटा</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">mukhauta</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Hindi</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">मुखौटा</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">mukhauta</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">-</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Hungarian</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maszk</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maszk</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/mɒsk/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Hungarian</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">maszk</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">maszk</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/mɒsk/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Icelandic</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">gríma</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">gríma</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/kriːma/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Icelandic</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">gríma</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">gríma</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/kriːma/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Igbo</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">mkpu</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">mkpu</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/mkk͡p~ɓ̥u/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Igbo</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">mkpu</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">mkpu</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/mkk͡p~ɓ̥u/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Indonesian</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">topeng</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">topeng</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/topɛŋ/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Indonesian</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">topeng</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">topeng</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/topɛŋ/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Indonesian</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">masker</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">masker</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/maskər/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Indonesian</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">masker</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">masker</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/maskər/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Irish</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">masc</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">masc</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/mɑːsk/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Irish</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">masc</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">masc</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/mɑːsk/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Italian</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maschera</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">mascherina</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/maskeɾina/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Italian</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">maschera</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">mascherina</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/maskeɾina/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Japanese</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">マスク</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">masuku</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/masɯkɯ/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Japanese</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">マスク</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">masuku</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/masɯkɯ/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Javanese</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">mask</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">mask</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Javanese</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">mask</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">mask</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">-</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Kannada</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">ಮಸುಕು</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">mukhavāḍa</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Kannada</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">ಮಸುಕು</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">mukhavāḍa</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">-</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Kazakh</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">маска</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maska</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/maska/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Kazakh</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">маска</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">maska</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/maska/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Khmer</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">របាំង</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">rbang</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Khmer</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">របាំង</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">rbang</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">-</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Kinyarwanda</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">agapfukamunwa</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">agapfukamunwa</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/agapfukamuŋwa/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Kinyarwanda</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">agapfukamunwa</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">agapfukamunwa</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/agapfukamuŋwa/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Korean</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">마스크</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maseukeu</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/ma̠sʰɯkxɯ/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Korean</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">마스크</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">maseukeu</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/ma̠sʰɯkxɯ/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Kurdish (Kurmanji)</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">berrû</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">berrû</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/beru/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Kurdish (Kurmanji)</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">berrû</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">berrû</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/beru/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Kyrgyz</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">маска</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maska</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Kyrgyz</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">маска</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">maska</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">-</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Lao</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">ຫນ້າກາກ</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">nā kāk</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Lao</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">ຫນ້າກາກ</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">nā kāk</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">-</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Latvian</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maska</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maska</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/maska/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Latvian</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">maska</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">maska</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/maska/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Lithuanian</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">kaukė</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">kaukė</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/kâˑʊ̯ke/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Lithuanian</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">kaukė</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">kaukė</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/kâˑʊ̯ke/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Luxembourgish</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">mask</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">mask</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/mask/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Luxembourgish</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">mask</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">mask</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/mask/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Macedonian</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">маска</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maska</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/maska/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Macedonian</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">маска</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">maska</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/maska/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Malay</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">topeng</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">topeng</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/topɛŋ/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Malay</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">topeng</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">topeng</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/topɛŋ/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Malay</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">کدوق</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">kedok</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/kedok/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Malay</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">کدوق</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">kedok</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/kedok/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Malayalam</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">മാസ്ക്</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">māsk</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Malayalam</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">മാസ്ക്</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">māsk</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">-</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Maltese</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maskra</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maskra</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/maskra/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Maltese</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">maskra</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">maskra</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/maskra/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Māori </td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maruhā</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maruhā</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/maɾuha/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Māori </td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">maruhā</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">maruhā</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/maɾuha/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Marathi</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">लपवू</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">lapavū</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Marathi</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">लपवू</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">lapavū</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">-</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Mongolian</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">маск</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">mask</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/mask/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Mongolian</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">маск</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">mask</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/mask/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Myanmar (Burmese)</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">မျက်နှာဖုံး</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">myakhnahpum</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/mjɛʔn̥əpʰóʊɴ/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Myanmar (Burmese)</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">မျက်နှာဖုံး</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">myakhnahpum</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/mjɛʔn̥əpʰóʊɴ/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Nepali</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">मुखवटा</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">mukhavaṭā</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Nepali</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">मुखवटा</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">mukhavaṭā</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">-</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Norwegian</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maskara</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maskara</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/maskara/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Norwegian</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">maskara</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">maskara</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/maskara/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Odia</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">ମାସ୍କ</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">māska</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Odia</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">ମାସ୍କ</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">māska</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">-</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Pashto</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">ماسک</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">mâsk-hâ</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Pashto</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">ماسک</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">mâsk-hâ</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">-</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Persian (Farsi)</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">نقاب زدن</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">mask</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/mask/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Persian (Farsi)</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">نقاب زدن</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">mask</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/mask/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Polish</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maska</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maska</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/maskɔ̃/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Polish</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">maska</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">maska</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/maskɔ̃/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Portuguese</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">máscara</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">máscara</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/maskaɾa/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Portuguese</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">máscara</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">máscara</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/maskaɾa/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Punjabi</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">ਮਾਸਕ</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">māsaka</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Punjabi</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">ਮਾਸਕ</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">māsaka</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">-</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Romanian</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">masca</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">masca</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/maska/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Romanian</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">masca</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">masca</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/maska/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Russian</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">маскировать</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maskirovat'</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/məskʲɪrɐˈvatʲ/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Russian</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">маскировать</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">maskirovat'</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/məskʲɪrɐˈvatʲ/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Samoan</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">ufimata</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">ufimata</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Samoan</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">ufimata</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">ufimata</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">-</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Scots Gaelic</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">masg</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">masg</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/masɡ/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Scots Gaelic</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">masg</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">masg</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/masɡ/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Serbian</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">маскa</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maska</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Serbian</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">маскa</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">maska</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">-</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Sesotho</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">pata</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">pata</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Sesotho</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">pata</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">pata</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">-</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Shona</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">chifukidzo</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">chifukidzo</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Shona</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">chifukidzo</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">chifukidzo</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">-</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Sindhi</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">ماسڪ</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">nutarian</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Sindhi</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">ماسڪ</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">nutarian</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">-</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Sinhala</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">වෙස්මුහුණ</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">vesmuhuṇa</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Sinhala</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">වෙස්මුහුණ</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">vesmuhuṇa</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">-</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Slovak</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maskovať</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maskovať</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/maskovat/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Slovak</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">maskovať</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">maskovať</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/maskovat/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Slovenian</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maska</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maska</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/maska/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Slovenian</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">maska</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">maska</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/maska/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Somali</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maaskaro</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maaskaro</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Somali</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">maaskaro</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">maaskaro</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">-</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Spanish</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">máscara</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">máscara</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/maskaɾa/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Spanish</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">máscara</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">máscara</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/maskaɾa/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Sundanese</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">topéng</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">topéng</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/topɛŋ/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Sundanese</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">topéng</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">topéng</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/topɛŋ/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Swahili</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">mask</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">mask</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/mask/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Swahili</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">mask</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">mask</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/mask/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Swedish (Svenska)</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">mask</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">mask</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/mask/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Swedish (Svenska)</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">mask</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">mask</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/mask/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Tajik</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">ниқоб</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">niqoʙ</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Tajik</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">ниқоб</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">niqoʙ</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">-</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Tamil</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">முகமூடி</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">mukamūṭi</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Tamil</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">முகமூடி</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">mukamūṭi</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">-</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Tatar</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">маска</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maska</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/maska/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Tatar</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">маска</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">maska</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/maska/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Telugu</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">ముసుగు</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">musugu</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Telugu</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">ముసుగు</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">musugu</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">-</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Thai</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">หน้ากาก</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">nâakàak</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/naː˥˩kaːk̚˨˩/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Thai</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">หน้ากาก</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">nâakàak</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/naː˥˩kaːk̚˨˩/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Turkish</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maske</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maske</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/mask̟ʰe/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Turkish</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">maske</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">maske</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/mask̟ʰe/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Turkmen</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maska</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maska</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Turkmen</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">maska</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">maska</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">-</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Ukrainian</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">маскувати</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maskuvaty</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/mɑskɐ/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Ukrainian</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">маскувати</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">maskuvaty</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/mɑskɐ/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Urdu</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">ماسک</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">mask</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Urdu</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">ماسک</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">mask</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">-</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Uyghur</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">mask</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">mask</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Uyghur</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">mask</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">mask</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">-</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Uzbek</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">niqob</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">niqob</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Uzbek</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">niqob</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">niqob</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">-</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Vietnamese</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">khẩu trang</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">khẩu trang</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/kʰəw˨˩˦ ʈaːŋ˧˧/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Vietnamese</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">khẩu trang</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">khẩu trang</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/kʰəw˨˩˦ ʈaːŋ˧˧/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Welsh</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">mwgwd</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">mwgwd</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">/mʊɡʊd/</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Welsh</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">mwgwd</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">mwgwd</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">/mʊɡʊd/</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Xhosa</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">imaski</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">imaski</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Xhosa</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">imaski</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">imaski</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">-</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Yiddish</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">מאַסקע</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">maske</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Yiddish</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">מאַסקע</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">maske</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">-</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Yoruba</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">boju-abẹ</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">boju-abẹ</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Yoruba</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">boju-abẹ</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">boju-abẹ</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">-</td>
     </tr>
     <tr>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">Zulu</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">imaski</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">imaski</td>
-      <td class="gt_row gt_left" style="background-color: #141414; color: white;">-</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">Zulu</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">imaski</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">imaski</td>
+      <td class="gt_row gt_left" style="background-color: rgba(255,255,255,0); color: black;">-</td>
     </tr>
   </tbody>
   <tfoot class="gt_sourcenotes">
@@ -1219,7 +1314,7 @@ Figure 1: Mean time (and standard deviation) for each combination of methods and
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
 }
 
-#kflswphtdm .gt_table {
+#ldmolbvnnw .gt_table {
   display: table;
   border-collapse: collapse;
   margin-left: auto;
@@ -1244,7 +1339,7 @@ Figure 1: Mean time (and standard deviation) for each combination of methods and
   border-left-color: #D3D3D3;
 }
 
-#kflswphtdm .gt_heading {
+#ldmolbvnnw .gt_heading {
   background-color: #141414;
   text-align: center;
   border-bottom-color: #141414;
@@ -1256,7 +1351,7 @@ Figure 1: Mean time (and standard deviation) for each combination of methods and
   border-right-color: #D3D3D3;
 }
 
-#kflswphtdm .gt_title {
+#ldmolbvnnw .gt_title {
   color: #FFFFFF;
   font-size: 125%;
   font-weight: initial;
@@ -1266,7 +1361,7 @@ Figure 1: Mean time (and standard deviation) for each combination of methods and
   border-bottom-width: 0;
 }
 
-#kflswphtdm .gt_subtitle {
+#ldmolbvnnw .gt_subtitle {
   color: #FFFFFF;
   font-size: 85%;
   font-weight: initial;
@@ -1276,13 +1371,13 @@ Figure 1: Mean time (and standard deviation) for each combination of methods and
   border-top-width: 0;
 }
 
-#kflswphtdm .gt_bottom_border {
+#ldmolbvnnw .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#kflswphtdm .gt_col_headings {
+#ldmolbvnnw .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1297,7 +1392,7 @@ Figure 1: Mean time (and standard deviation) for each combination of methods and
   border-right-color: #D3D3D3;
 }
 
-#kflswphtdm .gt_col_heading {
+#ldmolbvnnw .gt_col_heading {
   color: #FFFFFF;
   background-color: #141414;
   font-size: 100%;
@@ -1317,7 +1412,7 @@ Figure 1: Mean time (and standard deviation) for each combination of methods and
   overflow-x: hidden;
 }
 
-#kflswphtdm .gt_column_spanner_outer {
+#ldmolbvnnw .gt_column_spanner_outer {
   color: #FFFFFF;
   background-color: #141414;
   font-size: 100%;
@@ -1329,15 +1424,15 @@ Figure 1: Mean time (and standard deviation) for each combination of methods and
   padding-right: 4px;
 }
 
-#kflswphtdm .gt_column_spanner_outer:first-child {
+#ldmolbvnnw .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#kflswphtdm .gt_column_spanner_outer:last-child {
+#ldmolbvnnw .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#kflswphtdm .gt_column_spanner {
+#ldmolbvnnw .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -1349,7 +1444,7 @@ Figure 1: Mean time (and standard deviation) for each combination of methods and
   width: 100%;
 }
 
-#kflswphtdm .gt_group_heading {
+#ldmolbvnnw .gt_group_heading {
   padding: 8px;
   color: #FFFFFF;
   background-color: #3b3d42;
@@ -1371,7 +1466,7 @@ Figure 1: Mean time (and standard deviation) for each combination of methods and
   vertical-align: middle;
 }
 
-#kflswphtdm .gt_empty_group_heading {
+#ldmolbvnnw .gt_empty_group_heading {
   padding: 0.5px;
   color: #FFFFFF;
   background-color: #3b3d42;
@@ -1386,15 +1481,15 @@ Figure 1: Mean time (and standard deviation) for each combination of methods and
   vertical-align: middle;
 }
 
-#kflswphtdm .gt_from_md > :first-child {
+#ldmolbvnnw .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#kflswphtdm .gt_from_md > :last-child {
+#ldmolbvnnw .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#kflswphtdm .gt_row {
+#ldmolbvnnw .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1413,7 +1508,7 @@ Figure 1: Mean time (and standard deviation) for each combination of methods and
   overflow-x: hidden;
 }
 
-#kflswphtdm .gt_stub {
+#ldmolbvnnw .gt_stub {
   color: #FFFFFF;
   background-color: #141414;
   font-size: 100%;
@@ -1425,7 +1520,7 @@ Figure 1: Mean time (and standard deviation) for each combination of methods and
   padding-left: 12px;
 }
 
-#kflswphtdm .gt_summary_row {
+#ldmolbvnnw .gt_summary_row {
   color: #FFFFFF;
   background-color: #141414;
   text-transform: inherit;
@@ -1435,7 +1530,7 @@ Figure 1: Mean time (and standard deviation) for each combination of methods and
   padding-right: 5px;
 }
 
-#kflswphtdm .gt_first_summary_row {
+#ldmolbvnnw .gt_first_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1445,7 +1540,7 @@ Figure 1: Mean time (and standard deviation) for each combination of methods and
   border-top-color: #D3D3D3;
 }
 
-#kflswphtdm .gt_grand_summary_row {
+#ldmolbvnnw .gt_grand_summary_row {
   color: #FFFFFF;
   background-color: #141414;
   text-transform: inherit;
@@ -1455,7 +1550,7 @@ Figure 1: Mean time (and standard deviation) for each combination of methods and
   padding-right: 5px;
 }
 
-#kflswphtdm .gt_first_grand_summary_row {
+#ldmolbvnnw .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1465,11 +1560,11 @@ Figure 1: Mean time (and standard deviation) for each combination of methods and
   border-top-color: #D3D3D3;
 }
 
-#kflswphtdm .gt_striped {
+#ldmolbvnnw .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#kflswphtdm .gt_table_body {
+#ldmolbvnnw .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1478,7 +1573,7 @@ Figure 1: Mean time (and standard deviation) for each combination of methods and
   border-bottom-color: #D3D3D3;
 }
 
-#kflswphtdm .gt_footnotes {
+#ldmolbvnnw .gt_footnotes {
   color: #FFFFFF;
   background-color: #141414;
   border-bottom-style: none;
@@ -1492,13 +1587,13 @@ Figure 1: Mean time (and standard deviation) for each combination of methods and
   border-right-color: #D3D3D3;
 }
 
-#kflswphtdm .gt_footnote {
+#ldmolbvnnw .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding: 4px;
 }
 
-#kflswphtdm .gt_sourcenotes {
+#ldmolbvnnw .gt_sourcenotes {
   color: #FFFFFF;
   background-color: #141414;
   border-bottom-style: none;
@@ -1512,46 +1607,46 @@ Figure 1: Mean time (and standard deviation) for each combination of methods and
   border-right-color: #D3D3D3;
 }
 
-#kflswphtdm .gt_sourcenote {
+#ldmolbvnnw .gt_sourcenote {
   font-size: 90%;
   padding: 4px;
 }
 
-#kflswphtdm .gt_left {
+#ldmolbvnnw .gt_left {
   text-align: left;
 }
 
-#kflswphtdm .gt_center {
+#ldmolbvnnw .gt_center {
   text-align: center;
 }
 
-#kflswphtdm .gt_right {
+#ldmolbvnnw .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#kflswphtdm .gt_font_normal {
+#ldmolbvnnw .gt_font_normal {
   font-weight: normal;
 }
 
-#kflswphtdm .gt_font_bold {
+#ldmolbvnnw .gt_font_bold {
   font-weight: bold;
 }
 
-#kflswphtdm .gt_font_italic {
+#ldmolbvnnw .gt_font_italic {
   font-style: italic;
 }
 
-#kflswphtdm .gt_super {
+#ldmolbvnnw .gt_super {
   font-size: 65%;
 }
 
-#kflswphtdm .gt_footnote_marks {
+#ldmolbvnnw .gt_footnote_marks {
   font-style: italic;
   font-size: 65%;
 }
 </style>
-<div id="kflswphtdm" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;"><table class="gt_table">
+<div id="ldmolbvnnw" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;"><table class="gt_table">
   <thead class="gt_header">
     <tr>
       <th colspan="8" class="gt_heading gt_title gt_font_normal" style>Time taken to import and merge</th>

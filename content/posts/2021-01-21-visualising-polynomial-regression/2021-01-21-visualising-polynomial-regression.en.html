@@ -2,7 +2,7 @@
 title: Visualising polynomial regression
 author: Gonzalo Garcia-Castro
 date: '2021-01-21'
-slug: visualising-polynomial-regression
+slug: Visualising polynomial regression
 categories: []
 tags: []
 toc: no
@@ -32,7 +32,7 @@ output:
 <p>where <span class="math inline">\(\beta_{0}\)</span> is the <strong>intercept</strong> (the value of the input variable <span class="math inline">\(x\)</span> where the output variable <span class="math inline">\(y=0\)</span>), and where <span class="math inline">\(\beta_{1}\)</span> is the <strong>coefficient</strong> of the input variable (how much <span class="math inline">\(y\)</span> increases for every unit increase in <span class="math inline">\(x\)</span>). To illustrate this, let’s imagine we are curious abut what proportion of the students in a classroom are paying attention, and how this proportion changes as minutes pass. We could formalise our model as</p>
 <p><span class="math inline">\(y_i = \beta_{0} + \beta_{1} Time_i\)</span>.</p>
 <p>Let’s generate some data to illustrate this example. Let’s say that, at the beginning of the lesson, almost 100% of the students are paying attention, but that after some time stop paying attention. Right before the end of the class, students start paying attention again.</p>
-<p><img src="/posts/2021-01-21-visualising-polynomial-regression/2021-01-21-visualising-polynomial-regression.en_files/attention.png" /></p>
+<p><img src="/img/attention.png" /></p>
 <p>The attention paid by the students did not decay linearly, but first dropped and rose up again, following a curvilinear trend. In these cases, we may want to perform some transformation on some input variables to account for this non-linear relationship. One of these transformations are <strong>polynomial transformations</strong>. In this context, when we talk about applying a polynomial function to a set of values, we usually mean exponentiating it by a positive number larger than 1. The power by which we exponentiate our variable defines the degree of the polynomial we are obtaining. Exponentiating our variable to the power of 2 will give us its second-degree polynomial. Exponentiating it by 3 will give us its third-degree polynomial, and so on. Back to our classroom example, we could add a new term to our regression equation: the second-degree polynomial of the input variable <span class="math inline">\(Time\)</span>, or even a third degree polynomial if we wanted to test to what extend our model follows a more complex pattern. Our regression trend will not be linear any more, but curvilinear. Let’s take a look at the anatomy of polynomials from a visual (and very informal perspective). Our model would look like this:</p>
 <p><span class="math display">\[
 y_i = \beta_{0} + \beta_{1} Time_i + \beta_{2} Time_{i}^2 + \beta_{3} Time_{i}^3
@@ -43,25 +43,25 @@ y_i = \beta_{0} + \beta_{1} Time_i + \beta_{2} Time_{i}^2 + \beta_{3} Time_{i}^3
 <div id="intercept" class="section level2">
 <h2>Intercept</h2>
 <p>First, let’s start with how the value of the <strong>intercept</strong> (<span class="math inline">\(\beta_0\)</span>) changes the regression line for polynomials of different degree (1st, 2nd, and 3rd). I set the rest of the coefficients to arbitrary values for simplicity (<span class="math inline">\(\beta_1 = \beta_2 = \beta_3 = 1\)</span>). As you can see, regardless of the order of the polynomials involved in the model, increasing the intercept makes the line be higher in the Y-axis, and decreasing the value of the intercept make the line be lower in the Y-axis. Simple as that.</p>
-<p><img src="/posts/2021-01-21-visualising-polynomial-regression/2021-01-21-visualising-polynomial-regression.en_files/intercept.gif" /></p>
+<p><img src="/img/intercept.gif" /></p>
 <p>Thus, the interpretation of the intercept is similar to how do interpret it in standard linear regression models. It tells us the value of <span class="math inline">\(y\)</span> when all other coefficients are set to 0. As we will discuss later, what that means depends on what that zero means for the other coefficients, that is, how we coded them. For now, let’s cotinue adding more terms to the equation.</p>
 </div>
 <div id="linear-term-adding-a-1st-order-polynomial" class="section level2">
 <h2>Linear term: adding a 1st-order polynomial</h2>
 <p>Now let’s see how a linear model (with only a 1st degree polynomial) changes as we vary the value of <span class="math inline">\(\beta_1\)</span>, the coefficient of the linear term <span class="math inline">\(Time\)</span>. As you can see, nothing special happens, the line just gets steeper, meaning that for every unit increase in <span class="math inline">\(x\)</span>, <span class="math inline">\(y\)</span> increases (or decreases, depending on the sign) in <span class="math inline">\(\beta_1\)</span> units. When the coefficient equals zero, there is no increase nor decrease in <span class="math inline">\(y\)</span> for any change in <span class="math inline">\(x\)</span>.</p>
-<p><img src="/posts/2021-01-21-visualising-polynomial-regression/2021-01-21-visualising-polynomial-regression.en_files/linear.gif" /></p>
+<p><img src="/img/linear.gif" /></p>
 <p>When <span class="math inline">\(\beta_1=0\)</span>, the resulting line is completely horizontal, parallel to the X-axis. This is what a model with just an intercept (<span class="math inline">\(y = \beta_{0}\)</span>) would look like. We generalise this to say that the linear model we just visualised is exactly the same as adding a 2nd and a 3rd degree polynomial to the model with their correspondent coefficients set to zero (<span class="math inline">\(\beta_2 = 0\)</span> and <span class="math inline">\(`\beta_3 = 0\)</span>, respectively).</p>
 </div>
 <div id="quadratic-adding-a-2nd-order-polynomial" class="section level2">
 <h2>Quadratic: adding a 2nd-order polynomial</h2>
 <p>Now things get a bit more interesting. When we add a second order polynomial (<span class="math inline">\(Time^2\)</span>), the line is not linear any more. If the coefficient of the 2nd-order polynomial (<span class="math inline">\(\beta_2\)</span>) is positive, the curve will go down and up in that order. When <span class="math inline">\(\beta_2 &lt; 0\)</span>, the curve goes up and then down. When <span class="math inline">\(\beta_2 = 0\)</span>, the curve turns out the be a line whose slope is defined by <span class="math inline">\(\beta_1\)</span>, just like in the previous example.</p>
-<p><img src="/posts/2021-01-21-visualising-polynomial-regression/2021-01-21-visualising-polynomial-regression.en_files/quadratic.gif" /></p>
+<p><img src="/img/quadratic.gif" /></p>
 <p>Importantly, varying the value of the coefficient of 1st-order polynomials (<span class="math inline">\(\beta_1\)</span>) also changes the shape of the curve: more positive values of <span class="math inline">\(\beta_1\)</span> make the curve “fold” at higher values of <span class="math inline">\(x\)</span>. As you can see, when <span class="math inline">\(\beta_1 &lt; 0\)</span> (left panel, in blue), the point at which the curve starts increasing or decreasing occurs more to the left. When <span class="math inline">\(\beta_2 &gt; 0\)</span>, this change occurs more to the right.</p>
 </div>
 <div id="cubic-adding-a-3rd-order-polynomial" class="section level2">
 <h2>Cubic: adding a 3rd-order polynomial</h2>
 <p>Finally, let’s complicate things a bit more by adding a third-order polynomial. Now the curve will “fold” two times. As in the previous example, it’s the value of <span class="math inline">\(\beta_2\)</span> (the coefficient of the 2nd order polynomial) that determines whether the curve goes down-up-down or up-down-up, depending on whether <span class="math inline">\(\beta_2 &lt; 0\)</span> (<em>up-down-up</em>) or <span class="math inline">\(\beta_2 &gt; 0\)</span> (<em>down-up-down</em>). how larger the value of the coefficient of the 3rd-order polynomial is (regardless of whether it’s positive or negative) determines, for both “folding” points, how quickly the curve rises after dropping (if <span class="math inline">\(\beta_2 &gt; 0\)</span>), or how how quickly it drops after rising (if <span class="math inline">\(\beta_2 &lt; 0\)</span>). Finally, the value of <span class="math inline">\(\beta_1\)</span> changes the value of <span class="math inline">\(x\)</span> at which the curve folds. More negative values of <span class="math inline">\(\beta_1\)</span> make the curve fold at lower values of <span class="math inline">\(x\)</span>, while more positive values of <span class="math inline">\(\beta_1\)</span> make the curve fold at higher values of <span class="math inline">\(x\)</span>.</p>
-<p><img src="/posts/2021-01-21-visualising-polynomial-regression/2021-01-21-visualising-polynomial-regression.en_files/cubic.gif" /></p>
+<p><img src="/img/cubic.gif" /></p>
 </div>
 <div id="conclusion" class="section level2">
 <h2>Conclusion</h2>

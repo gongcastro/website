@@ -36,13 +36,13 @@ taxonomies:
   tag: tags
 params:
   contentTypeName: posts
-  customCSS: ["custom.css"]
+  customCSS: ["/css/custom.css"]
   customJS: []
   dateform: Jan 2, 2006
   dateformNum: '2006-01-02'
   dateformNumTime: 2006-01-02 15:04 -0700
   dateformShort: Jan 2
-  defaultTheme: dark
+  defaultTheme: light
   description: Nice theme for homepages and blogs
   homeSubtitle: Hello Friend NG
   images: ''
@@ -52,7 +52,7 @@ params:
   ORCID: 0000-0002-8553-4209
   google-scholar: fHetiuQAAAAJ&hl
   logo:
-    logoHomeLink: /img/logo.png
+    logoHomeLink:
     logoText: $ cd /gongcastro/
     logoCursorColor: #e8b941
   portrait:
