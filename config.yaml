@@ -6,8 +6,7 @@ theme: hugo-theme-hello-friend-ng
 PygmentsCodeFences: yes
 PygmentsStyle: monokai
 rssLimit: 10
-copyright: This work is licensed under a Creative Commons Attribution-NonCommercial
-  4.0 International License.
+copyright: CC-NC-4.0.
 archetypeDir: archetypes
 contentDir: content
 dataDir: data
@@ -18,7 +17,7 @@ buildFuture: no
 buildExpored: no
 canonifyURLs: yes
 enableRobotsTXT: yes
-enableGitInfo: no
+enableGitInfo: true
 enableEmoji: yes
 enableMissingTranslationPlaceholders: no
 disableRSS: no
@@ -43,11 +42,11 @@ params:
   dateformNumTime: 2006-01-02 15:04 -0700
   dateformShort: Jan 2
   defaultTheme: light
-  description: "Gonzalo Garcia-Castro-s personal website"
+  description: "Gonzalo Garcia-Castro's personal website"
   homeSubtitle:  "Developmental psychology, psycholinguistics, Rstats"
   images: ''
   justifyContent: no
-  keywords: 'Developmental psychology, psycholonguistics, Rstats'
+  keywords: 'Developmental psychology, psycholinguistics, Rstats'
   round-avatar: true
   ORCID: 0000-0002-8553-4209
   google-scholar: fHetiuQAAAAJ&hl
@@ -67,17 +66,6 @@ params:
     - name: github
       url: https://github.com/gongcastro
   themeColor: #e8b941
-languages:
-  en:
-    copyright: <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank"
-      rel="noopener">CC BY-NC 4.0</a>
-    subtitle: "Developmental psychology, psycholinguistics and Rstats"
-    weight: 1
-  fr:
-    copyright: <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank"
-      rel="noopener">CC BY-NC 4.0</a>
-    subtitle: "Developmental psychology, psycholinguistics and Rstats"
-    weight: 2
 menu:
   main:
     - identifier: about
