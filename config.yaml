@@ -1,7 +1,7 @@
 baseURL: https://gongcastro.netlify.app
 url-pretty: "gongcastro.netlify.app"
 title: Gonzalo Garcia-Castro
-DefaultContentLanguage: fr
+DefaultContentLanguage: en
 theme: hugo-theme-hello-friend-ng
 PygmentsCodeFences: yes
 PygmentsStyle: monokai
@@ -72,11 +72,6 @@ languages:
       rel="noopener">CC BY-NC 4.0</a>
     subtitle: "Developmental psychology, psycholinguistics and Rstats"
     weight: 1
-  fr:
-    copyright: <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank"
-      rel="noopener">CC BY-NC 4.0</a>
-    subtitle: "Developmental psychology, psycholinguistics and Rstats"
-    weight: 2
 menu:
   main:
     - identifier: about

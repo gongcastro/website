@@ -2,17 +2,62 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Gonzalo Garcia-Castro</title>
-    <link>https://gongcastro.netlify.app/index.html</link>
+    <link>https://gongcastro.netlify.app/</link>
     <description>Recent content on Gonzalo Garcia-Castro</description>
     <generator>Hugo -- gohugo.io</generator>
-    <copyright>&lt;a href=&#34;https://creativecommons.org/licenses/by-nc/4.0/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;CC BY-NC 4.0&lt;/a&gt;</copyright><atom:link href="https://gongcastro.netlify.app/index.xml" rel="self" type="application/rss+xml" />
+    <copyright>&lt;a href=&#34;https://creativecommons.org/licenses/by-nc/4.0/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34;&gt;CC BY-NC 4.0&lt;/a&gt;</copyright>
+    <lastBuildDate>Thu, 21 Jan 2021 00:00:00 +0000</lastBuildDate><atom:link href="https://gongcastro.netlify.app/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>Tags</title>
-      <link>https://gongcastro.netlify.app/tags/</link>
+      <title>Visualising polynomial regression</title>
+      <link>https://gongcastro.netlify.app/posts/2021/01/visualising-polynomial-regression/</link>
+      <pubDate>Thu, 21 Jan 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://gongcastro.netlify.app/posts/2021/01/visualising-polynomial-regression/</guid>
+      <description>TL;DRThe outputs of polynomial regression can be difficult to interpret. I generated some animated plots to see how model predictions change across different combinations of coefficients for 1st, 2nd, and 3rd degree polynomials.
+Why polynomialsWhen modelling data using regression, sometimes the relationship between input variables and output variables is not very well captured by a straight line. A standard linear model is defined by the equation</description>
+    </item>
+    
+    <item>
+      <title>How similar is the word &#34;mask&#34; across languages?</title>
+      <link>https://gongcastro.netlify.app/posts/2020/11/how-similar-is-the-word-mask-across-languages/</link>
+      <pubDate>Fri, 20 Nov 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://gongcastro.netlify.app/posts/2020/11/how-similar-is-the-word-mask-across-languages/</guid>
+      <description>The ubiquity of masks has given psycholinguists a frequent-ish stimulus to use in experiments. This word is more form-similar across languages than one may think. I gathered a big-ish dataset with translation equivalents of the word mask across ~110 languages. I tweeted about this today, and wanted to dedicate some more lines to nuance.
+The ubiquity of #masks😷 has given psycholinguists a frequent-ish stimulus to use in experiments.</description>
+    </item>
+    
+    <item>
+      <title>Importing data from multiple files simultaneously in R</title>
+      <link>https://gongcastro.netlify.app/posts/2020/07/importing-data-from-multiple-files-simultaneously-in-r/</link>
+      <pubDate>Mon, 20 Jul 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://gongcastro.netlify.app/posts/2020/07/importing-data-from-multiple-files-simultaneously-in-r/</guid>
+      <description>TL;DRWe need to import several CSV or TXT files and merge them into one data frame in R. Regardless of what function we use to import the files, vectorising the operation using purrr::map in combination with do.call or dplyr::bind_rows is the most time-efficient method (~25 ms importing 50 files with 10,000 rows each), compared to for loops (~220ms) or using lapply (~123 ms). data.table::fread is the fastest function for importing data.</description>
+    </item>
+    
+    <item>
+      <title>About</title>
+      <link>https://gongcastro.netlify.app/about/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>https://gongcastro.netlify.app/tags/</guid>
-      <description></description>
+      <guid>https://gongcastro.netlify.app/about/</guid>
+      <description>I am a PhD student studying developmental psycholinguistics at the Center for Brain and Cognition (Universitat Pompeu Fabra), under the supervision of Prof. Núria Sebastian-Galles.
+At the Speech Acquisition and Perception research group we investigate a wide range of topics related to cognition at different ages, with a special focus on language perception and acquisition. The focus of my research is the intersection between developmental psychology, language acquisition, bilingualism, and psycholinguistics.</description>
+    </item>
+    
+    <item>
+      <title>CV</title>
+      <link>https://gongcastro.netlify.app/cv/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://gongcastro.netlify.app/cv/</guid>
+      <description>Education October 2018 - Present
+ PhD, Biomedecine; Pompeu Fabra University (Barcelona, Spain); Supervisor: Núria Sebastian-Galles.
+ October 2017 - July 2018
+ MSc, Neurosciences; University of Barcelona (Barcelona, Spain). Dissertation: Phonemic Contrast Perception: A Segmentation Study on Monolingual and Bilingual Infants; Supervisors: Núria Sebastian-Galles and Chiara Santolin.
+ September 2013 - July 2017
+ BSc, Psychology; University of Oviedo (Oviedo, Spain). Dissertation: Effects of Environmental Enrichment on Attention, Spatial Reference Memory, and Cytochrome C Oxidase Activity; Supervisors: Azucena Begega and Marcelino Cuesta.</description>
     </item>
     
   </channel>
