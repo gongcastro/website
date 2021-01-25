@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="author"
+    content="Gonzalo Garcia-Castro">
+<meta name="description"
+    content="TL;DRThe outputs of polynomial regression can be difficult to interpret. I generated some animated plots to see how model predictions change across different combinations of coefficients for 1st, 2nd, and 3rd degree polynomials.
+Why polynomialsWhen modelling data using regression, sometimes the relationship between input variables and output variables is not very well captured by a straight line. A standard linear model is defined by the equation" />
+<meta name="keywords" content="Developmental psychology, psycholinguistics, Rstats" />
+<meta name="robots" content="noodp" />
+<link rel="canonical" href="https://gongcastro.netlify.app/en/posts/2021/01/visualising-polynomial-regression/" />
+
+
+<title>
+    
+    Visualising polynomial regression :: Gonzalo Garcia-Castro  — Developmental psychology, psycholinguistics and Rstats
+    
+</title>
+
+
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.2.1/css/flag-icon.min.css" rel="stylesheet"
+    type="text/css">
+
+
+
+<link rel="stylesheet" href="https://gongcastro.netlify.app/main.min.f788887e332bb4b70905ccf3f343020983c931ef03d986116bc9244f36a5837b.css">
+
+
+
+<link rel="stylesheet" type="text/css" href="https://gongcastro.netlify.app/css/custom.css">
+
+
+
+<link rel="apple-touch-icon" sizes="180x180" href="https://gongcastro.netlify.app/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://gongcastro.netlify.app/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="https://gongcastro.netlify.app/favicon-16x16.png">
+<link rel="manifest" href="https://gongcastro.netlify.app/site.webmanifest">
+<link rel="mask-icon" href="https://gongcastro.netlify.app/safari-pinned-tab.svg" color="#252627">
+<link rel="shortcut icon" href="https://gongcastro.netlify.app/favicon.ico">
+<meta name="theme-color" content="#252627"><meta itemprop="name" content="Visualising polynomial regression">
+<meta itemprop="description" content="TL;DRThe outputs of polynomial regression can be difficult to interpret. I generated some animated plots to see how model predictions change across different combinations of coefficients for 1st, 2nd, and 3rd degree polynomials.
+Why polynomialsWhen modelling data using regression, sometimes the relationship between input variables and output variables is not very well captured by a straight line. A standard linear model is defined by the equation">
+<meta itemprop="datePublished" content="2021-01-21T00:00:00+00:00" />
+<meta itemprop="dateModified" content="2021-01-24T11:35:51+01:00" />
+<meta itemprop="wordCount" content="1506">
+
+
+
+<meta itemprop="keywords" content="" />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Visualising polynomial regression"/>
+<meta name="twitter:description" content="TL;DRThe outputs of polynomial regression can be difficult to interpret. I generated some animated plots to see how model predictions change across different combinations of coefficients for 1st, 2nd, and 3rd degree polynomials.
+Why polynomialsWhen modelling data using regression, sometimes the relationship between input variables and output variables is not very well captured by a straight line. A standard linear model is defined by the equation"/>
+
+
+
+
+<meta property="article:published_time" content="2021-01-21 00:00:00 &#43;0000 UTC" />
+
+
+
+
+
+
+
+    </head>
+
+    <body class="">
+        <div class="container">
+            <header class="header">
+    <span class="header__inner">
+        <a href="https://gongcastro.netlify.app" style="text-decoration: none;">
+    <div class="logo">
+        
+            <span class="logo__mark">></span>
+            <span class="logo__text">$ cd /gongcastro/</span>
+            <span class="logo__cursor"></span>
+        
+    </div>
+</a>
+
+
+        <span class="header__right">
+            
+                <nav class="menu">
+    <ul class="menu__inner"><li><a href="https://gongcastro.netlify.app/en/about/">About</a></li><li><a href="https://gongcastro.netlify.app/en/cv/">CV</a></li><li><a href="https://gongcastro.netlify.app/en/posts/">Posts</a></li>
+    </ul>
+</nav>
+
+                <span class="menu-trigger">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                    </svg>
+                </span>
+            
+
+            <span class="theme-toggle"><svg class="theme-toggler" width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M22 41C32.4934 41 41 32.4934 41 22C41 11.5066 32.4934 3 22
+  3C11.5066 3 3 11.5066 3 22C3 32.4934 11.5066 41 22 41ZM7 22C7
+  13.7157 13.7157 7 22 7V37C13.7157 37 7 30.2843 7 22Z"/>
+</svg>
+</span>
+        </span>
+    </span>
+</header>
+
+
+            <div class="content">
+                
+    <main class="post">
+
+        <div class="post-info">
+            <p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-clock"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>8 minutes
+
+            
+
+            </p>
+        </div>
+
+        <article>
+            <h1 class="post-title"><a href="https://gongcastro.netlify.app/en/posts/2021/01/visualising-polynomial-regression/">Visualising polynomial regression</a></h1>
+
+            
+
+            <div class="post-content">
+                
+<script src="https://gongcastro.netlify.app/rmarkdown-libs/header-attrs/header-attrs.js"></script>
+
+<div id="TOC">
+
+</div>
+
+<div id="tldr" class="section level2">
+<h2>TL;DR</h2>
+<blockquote>
+<p>The outputs of polynomial regression can be difficult to interpret. I generated some animated plots to see how model predictions change across different combinations of coefficients for 1st, 2nd, and 3rd degree polynomials.</p>
+</blockquote>
+</div>
+<div id="why-polynomials" class="section level2">
+<h2>Why polynomials</h2>
+<p>When modelling data using regression, sometimes the relationship between input variables and output variables is not very well captured by a straight line. A standard linear model is defined by the equation</p>
+<p><span class="math display">\[y_i = \beta_{0} + \beta_{1}x_{i}\]</span></p>
+<p>where <span class="math inline">\(\beta_{0}\)</span> is the <strong>intercept</strong> (the value of the input variable <span class="math inline">\(x\)</span> where the output variable <span class="math inline">\(y=0\)</span>), and where <span class="math inline">\(\beta_{1}\)</span> is the <strong>coefficient</strong> of the input variable (how much <span class="math inline">\(y\)</span> increases for every unit increase in <span class="math inline">\(x\)</span>). To illustrate this, let’s imagine we are curious abut what proportion of the students in a classroom are paying attention, and how this proportion changes as minutes pass. We could formalise our model as</p>
+<p><span class="math inline">\(y_i = \beta_{0} + \beta_{1} Time_i\)</span>.</p>
+<p>Let’s generate some data to illustrate this example. Let’s say that, at the beginning of the lesson, almost 100% of the students are paying attention, but that after some time stop paying attention. Right before the end of the class, students start paying attention again.</p>
+<p><img src="https://gongcastro.netlify.app/img/attention.png" /></p>
+<p>The attention paid by the students did not decay linearly, but first dropped and rose up again, following a curvilinear trend. In these cases, we may want to perform some transformation on some input variables to account for this non-linear relationship. One of these transformations are <strong>polynomial transformations</strong>. In this context, when we talk about applying a polynomial function to a set of values, we usually mean exponentiating it by a positive number larger than 1. The power by which we exponentiate our variable defines the degree of the polynomial we are obtaining. Exponentiating our variable to the power of 2 will give us its second-degree polynomial. Exponentiating it by 3 will give us its third-degree polynomial, and so on. Back to our classroom example, we could add a new term to our regression equation: the second-degree polynomial of the input variable <span class="math inline">\(Time\)</span>, or even a third degree polynomial if we wanted to test to what extend our model follows a more complex pattern. Our regression trend will not be linear any more, but curvilinear. Let’s take a look at the anatomy of polynomials from a visual (and very informal perspective). Our model would look like this:</p>
+<p><span class="math display">\[
+y_i = \beta_{0} + \beta_{1} Time_i + \beta_{2} Time_{i}^2 + \beta_{3} Time_{i}^3
+\]</span></p>
+<p>Adding polynomial terms to our regression offers much flexibility to researchers when modelling this kind of associations between input and output variables. This practice is, for example, common in Cognitive Science when analysing <strong>repeated measures</strong> data such as eye-tracking data, where we register what participants fixated in a screen during a trial under several conditions. Polynomial regression could be considered as of the main techniques in the more general category of <strong>Growth Curve Analyis</strong> (GCA) methods. If you are interested in learning GCA, you should take a look at Daniel Mirman’s “Growth Curve Analysis and Visualization Using R” [<a href="https://www.routledge.com/Growth-Curve-Analysis-and-Visualization-Using-R/Mirman/p/book/9781466584327">book</a>].</p>
+<p>Powerful as this technique is, it presents some pitfalls, especially to newbies like me. For instance, <strong>interpreting the outputs</strong> of a regression model that includes polynomials can tricky. In our example, depending on the values of the coefficients <span class="math inline">\(\beta_{1}\)</span>, <span class="math inline">\(\beta_2\)</span> and <span class="math inline">\(\beta_3\)</span>–the first-degree and second-degree polynomials of <span class="math inline">\(Time\)</span>–the shape of the resulting curve will be different. The combination of values that these two coefficient can take is infinite, and so is the number of potential shapes our curve can adopt. Interpreting how the values of these coefficients affect the shape of our model, and more importantly, their interaction with other predictors of interest in the model can be difficult without any kind of <strong>visualisation.</strong> The aim of this post is to visualise how the regression lines of a regression model changes with the degree of its polynomials. For computational constraints, and to make visualisation easier, I will only cover one, two, and three-degree polynomials. I will generate plots for multiple combinations of the coefficients of these polynomials using the base R function <code>poly()</code> to generate polynomials, the R package <code>ggplot2()</code> to generate plots, and the <code>gganimate</code> R package to animate the plots. I will briefly describe what is going on in each plot, but I hope the figures are themselves more informative than anything I can say about them!</p>
+</div>
+<div id="intercept" class="section level2">
+<h2>Intercept</h2>
+<p>First, let’s start with how the value of the <strong>intercept</strong> (<span class="math inline">\(\beta_0\)</span>) changes the regression line for polynomials of different degree (1st, 2nd, and 3rd). I set the rest of the coefficients to arbitrary values for simplicity (<span class="math inline">\(\beta_1 = \beta_2 = \beta_3 = 1\)</span>). As you can see, regardless of the order of the polynomials involved in the model, increasing the intercept makes the line be higher in the Y-axis, and decreasing the value of the intercept make the line be lower in the Y-axis. Simple as that.</p>
+<p><img src="https://gongcastro.netlify.app/img/intercept.gif" /></p>
+<p>Thus, the interpretation of the intercept is similar to how do interpret it in standard linear regression models. It tells us the value of <span class="math inline">\(y\)</span> when all other coefficients are set to 0. As we will discuss later, what that means depends on what that zero means for the other coefficients, that is, how we coded them. For now, let’s cotinue adding more terms to the equation.</p>
+</div>
+<div id="linear-term-adding-a-1st-order-polynomial" class="section level2">
+<h2>Linear term: adding a 1st-order polynomial</h2>
+<p>Now let’s see how a linear model (with only a 1st degree polynomial) changes as we vary the value of <span class="math inline">\(\beta_1\)</span>, the coefficient of the linear term <span class="math inline">\(Time\)</span>. As you can see, nothing special happens, the line just gets steeper, meaning that for every unit increase in <span class="math inline">\(x\)</span>, <span class="math inline">\(y\)</span> increases (or decreases, depending on the sign) in <span class="math inline">\(\beta_1\)</span> units. When the coefficient equals zero, there is no increase nor decrease in <span class="math inline">\(y\)</span> for any change in <span class="math inline">\(x\)</span>.</p>
+<p><img src="https://gongcastro.netlify.app/img/linear.gif" /></p>
+<p>When <span class="math inline">\(\beta_1=0\)</span>, the resulting line is completely horizontal, parallel to the X-axis. This is what a model with just an intercept (<span class="math inline">\(y = \beta_{0}\)</span>) would look like. We generalise this to say that the linear model we just visualised is exactly the same as adding a 2nd and a 3rd degree polynomial to the model with their correspondent coefficients set to zero (<span class="math inline">\(\beta_2 = 0\)</span> and <span class="math inline">\(`\beta_3 = 0\)</span>, respectively).</p>
+</div>
+<div id="quadratic-adding-a-2nd-order-polynomial" class="section level2">
+<h2>Quadratic: adding a 2nd-order polynomial</h2>
+<p>Now things get a bit more interesting. When we add a second order polynomial (<span class="math inline">\(Time^2\)</span>), the line is not linear any more. If the coefficient of the 2nd-order polynomial (<span class="math inline">\(\beta_2\)</span>) is positive, the curve will go down and up in that order. When <span class="math inline">\(\beta_2 &lt; 0\)</span>, the curve goes up and then down. When <span class="math inline">\(\beta_2 = 0\)</span>, the curve turns out the be a line whose slope is defined by <span class="math inline">\(\beta_1\)</span>, just like in the previous example.</p>
+<p><img src="https://gongcastro.netlify.app/img/quadratic.gif" /></p>
+<p>Importantly, varying the value of the coefficient of 1st-order polynomials (<span class="math inline">\(\beta_1\)</span>) also changes the shape of the curve: more positive values of <span class="math inline">\(\beta_1\)</span> make the curve “fold” at higher values of <span class="math inline">\(x\)</span>. As you can see, when <span class="math inline">\(\beta_1 &lt; 0\)</span> (left panel, in blue), the point at which the curve starts increasing or decreasing occurs more to the left. When <span class="math inline">\(\beta_2 &gt; 0\)</span>, this change occurs more to the right.</p>
+</div>
+<div id="cubic-adding-a-3rd-order-polynomial" class="section level2">
+<h2>Cubic: adding a 3rd-order polynomial</h2>
+<p>Finally, let’s complicate things a bit more by adding a third-order polynomial. Now the curve will “fold” two times. As in the previous example, it’s the value of <span class="math inline">\(\beta_2\)</span> (the coefficient of the 2nd order polynomial) that determines whether the curve goes down-up-down or up-down-up, depending on whether <span class="math inline">\(\beta_2 &lt; 0\)</span> (<em>up-down-up</em>) or <span class="math inline">\(\beta_2 &gt; 0\)</span> (<em>down-up-down</em>). how larger the value of the coefficient of the 3rd-order polynomial is (regardless of whether it’s positive or negative) determines, for both “folding” points, how quickly the curve rises after dropping (if <span class="math inline">\(\beta_2 &gt; 0\)</span>), or how how quickly it drops after rising (if <span class="math inline">\(\beta_2 &lt; 0\)</span>). Finally, the value of <span class="math inline">\(\beta_1\)</span> changes the value of <span class="math inline">\(x\)</span> at which the curve folds. More negative values of <span class="math inline">\(\beta_1\)</span> make the curve fold at lower values of <span class="math inline">\(x\)</span>, while more positive values of <span class="math inline">\(\beta_1\)</span> make the curve fold at higher values of <span class="math inline">\(x\)</span>.</p>
+<p><img src="https://gongcastro.netlify.app/img/cubic.gif" /></p>
+</div>
+<div id="conclusion" class="section level2">
+<h2>Conclusion</h2>
+<p>There are way more things to say about polynomial regression, and its’s more than likely that I sacrifice accuracy for simplicity. After all, the aim of generating these animations was helping myself understand the outpus of polynomial models a bit more easily in the futur. I hope it helps other stoo. If you consider something is misleading or unaccurate, please let me know! I’m the first interested in getting it right. Cheers!</p>
+</div>
+<div id="just-the-code" class="section level2">
+<h2>Just the code</h2>
+<script src="https://gist.github.com/gongcastro/9eb9e0c7e7502b48514514fef83fc509.js"></script>
+</div>
+<div id="session-info" class="section level2">
+<h2>Session info</h2>
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>## R version 4.0.2 (2020-06-22)
+## Platform: x86_64-w64-mingw32/x64 (64-bit)
+## Running under: Windows 10 x64 (build 19041)
+## 
+## Matrix products: default
+## 
+## locale:
+## [1] LC_COLLATE=English_United States.1252 
+## [2] LC_CTYPE=English_United States.1252   
+## [3] LC_MONETARY=English_United States.1252
+## [4] LC_NUMERIC=C                          
+## [5] LC_TIME=English_United States.1252    
+## 
+## attached base packages:
+## [1] stats     graphics  grDevices utils     datasets  methods   base     
+## 
+## loaded via a namespace (and not attached):
+##  [1] compiler_4.0.2  magrittr_2.0.1  bookdown_0.21   tools_4.0.2    
+##  [5] htmltools_0.5.1 yaml_2.2.1      stringi_1.5.3   rmarkdown_2.6  
+##  [9] blogdown_1.1.4  knitr_1.30      stringr_1.4.0   digest_0.6.27  
+## [13] xfun_0.20       rlang_0.4.10    evaluate_0.14</code></pre>
+</div>
+
+            </div>
+        </article>
+
+        <hr />
+
+        <div class="post-info">
+
+            <p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>1506 Words</p>
+
+            <p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>2021-01-21 01:00 &#43;0100</p>
+                <p><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-git-commit"><circle cx="12" cy="12" r="4"></circle><line x1="1.05" y1="12" x2="7" y2="12"></line><line x1="17.01" y1="12" x2="22.96" y2="12"></line></svg><a href="5e0cfadc935d1827441e157e937a8e550625f006" target="_blank" rel="noopener">5e0cfad</a> @ 2021-01-24</p>
+        </div>
+
+        
+            <div class="pagination">
+                <div class="pagination__title">
+                    <span class="pagination__title-h"></span>
+                    <hr />
+                </div>
+
+                <div class="pagination__buttons">
+                    
+
+                    
+                        <span class="button next">
+                            <a href="https://gongcastro.netlify.app/en/posts/2020/11/how-similar-is-the-word-mask-across-languages/">
+                                <span class="button__text">How similar is the word &#34;mask&#34; across languages?</span>
+                                <span class="button__icon">→</span>
+                            </a>
+                        </span>
+                    
+                </div>
+            </div>
+        
+
+        
+    </main>
+
+            </div>
+
+            
+                <footer class="footer">
+    <div class="footer__inner">
+        <div class="footer__content">
+            <span>&copy; 2021</span>
+            
+                <span><a href="https://gongcastro.netlify.app">Gonzalo Garcia-Castro</a></span>
+            
+            <span><a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener">CC BY-NC 4.0</a></span>
+            <span> <a href="https://gongcastro.netlify.app/en/posts/index.xml" target="_blank" title="rss"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rss"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg></a></span>
+        </div>
+    </div>
+    <div class="footer__inner">
+        <div class="footer__content">
+
+        </div>
+    </div>
+    <div class="footer__inner">
+        <div class="footer__content">
+            <span>Powered by <a href="http://gohugo.io">Hugo</a></span>
+            <span>Made with &#10084; by <a href="https://github.com/rhazdon">rhazdon</a></span>
+        </div>
+    </div>
+</footer>
+
+
+
+    <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML"></script>
+    
+    <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+            displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+            processEscapes: true,
+            processEnvironments: true
+        },
+        // Center justify equations in code and markdown cells. Elsewhere
+        // we use CSS to left justify single line equations in code cells.
+        displayAlign: 'center',
+        "HTML-CSS": {
+            styles: {'.MathJax_Display': {"margin": 0}},
+            linebreaks: { automatic: true }
+        }
+    });
+    </script>
+    
+
+    <link rel="stylesheet" href="https://gongcastro.netlify.app/css/the-css-you-chose.css" rel="stylesheet" id="theme-stylesheet"> 
+    <script src="https://gongcastro.netlify.app/js/highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+
+            
+        </div>
+
+        
+
+
+
+
+<script type="text/javascript" src="https://gongcastro.netlify.app/bundle.min.4c3fb12a087ceed4a52cb5d57068a9795c7069617a01ca70f788052ad66e1791779e6c72686e1dc0ca13dc03b0203204b6566bb0dd1ee80de2b7ff4d8fe53db2.js" integrity="sha512-TD&#43;xKgh87tSlLLXVcGipeVxwaWF6Acpw94gFKtZuF5F3nmxyaG4dwMoT3AOwIDIEtlZrsN0e6A3it/9Nj&#43;U9sg=="></script>
+
+
+
+    </body>
+</html>
