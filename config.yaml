@@ -66,6 +66,17 @@ params:
     - name: github
       url: https://github.com/gongcastro
   themeColor: #e8b941
+languages:
+  en:
+    copyright: <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank"
+      rel="noopener">CC BY-NC 4.0</a>
+    subtitle: "Developmental psychology, psycholinguistics and Rstats"
+    weight: 1
+  fr:
+    copyright: <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank"
+      rel="noopener">CC BY-NC 4.0</a>
+    subtitle: "Developmental psychology, psycholinguistics and Rstats"
+    weight: 2
 menu:
   main:
     - identifier: about

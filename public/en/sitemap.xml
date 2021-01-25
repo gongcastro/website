@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  
+  <url>
+    <loc>https://gongcastro.netlify.app/</loc>
+    <lastmod>2021-01-24T11:35:51+01:00</lastmod>
+    <xhtml:link
+                rel="alternate"
+                hreflang="fr"
+                href="https://gongcastro.netlify.app/fr/"
+                />
+    <xhtml:link
+                rel="alternate"
+                hreflang="en"
+                href="https://gongcastro.netlify.app/"
+                />
+  </url>
+  
+  <url>
+    <loc>https://gongcastro.netlify.app/posts/</loc>
+    <lastmod>2021-01-24T11:35:51+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://gongcastro.netlify.app/posts/2021/01/visualising-polynomial-regression/</loc>
+    <lastmod>2021-01-24T11:35:51+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://gongcastro.netlify.app/posts/2020/11/how-similar-is-the-word-mask-across-languages/</loc>
+    <lastmod>2021-01-24T11:35:51+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://gongcastro.netlify.app/posts/2020/07/importing-data-from-multiple-files-simultaneously-in-r/</loc>
+    <lastmod>2021-01-24T11:35:51+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://gongcastro.netlify.app/index.html</loc>
+    <xhtml:link
+                rel="alternate"
+                hreflang="fr"
+                href="https://gongcastro.netlify.app/fr/index.html"
+                />
+    <xhtml:link
+                rel="alternate"
+                hreflang="en"
+                href="https://gongcastro.netlify.app/index.html"
+                />
+  </url>
+  
+  <url>
+    <loc>https://gongcastro.netlify.app/about/</loc>
+    <lastmod>2021-01-21T23:38:56+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://gongcastro.netlify.app/cv/</loc>
+    <lastmod>2021-01-21T23:38:56+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://gongcastro.netlify.app/tags/</loc>
+    <xhtml:link
+                rel="alternate"
+                hreflang="fr"
+                href="https://gongcastro.netlify.app/fr/tags/"
+                />
+    <xhtml:link
+                rel="alternate"
+                hreflang="en"
+                href="https://gongcastro.netlify.app/tags/"
+                />
+  </url>
+  
+</urlset>
