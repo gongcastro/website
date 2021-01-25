@@ -42,18 +42,18 @@ params:
   dateformNumTime: 2006-01-02 15:04 -0700
   dateformShort: Jan 2
   defaultTheme: light
-  description: "Gonzalo Garcia-Castro's personal website"
-  homeSubtitle:  "Developmental psychology, psycholinguistics, Rstats"
+  description: Gonzalo Garcia-Castro's personal website
+  homeSubtitle:  Developmental psychology, psycholinguistics, Rstats
   images: ''
   justifyContent: no
-  keywords: 'Developmental psychology, psycholinguistics, Rstats'
+  keywords: Developmental psychology, psycholinguistics, Rstats
   round-avatar: true
   ORCID: 0000-0002-8553-4209
   google-scholar: fHetiuQAAAAJ&hl
   logo:
     logoHomeLink:
     logoText: $ cd /gongcastro/
-    logoCursorColor: orange
+    logoCursorColor: #e8b941
   portrait:
     path: /img/logo.png
     alt: Logo
