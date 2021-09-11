@@ -1,6 +1,10 @@
 body, p {
     color: black;
   }
+  
+a {
+  color: hotpink;
+}
 
 
 /* block quotes */
@@ -30,13 +34,13 @@ blockquote:before {
   }
 
 .topnav a:hover {
-    background-color: #ddd;
-    color: black;
+    background-color: red;
+    color: red;
   }
   
   .topnav a.active {
     background-color: #4CAF50;
-    color: white;
+    color: red;
   }
 
   /* code blocks */

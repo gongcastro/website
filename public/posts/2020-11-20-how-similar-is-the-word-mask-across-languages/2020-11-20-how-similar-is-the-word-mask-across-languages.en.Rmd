@@ -67,7 +67,7 @@ div(style='height:600px; overflow-y: scroll', t)
 ```
 
 
-To compute the similarity of each pair of translation equivaelnts, I followed Floccia et al.'s ([2018](https://srcd.onlinelibrary.wiley.com/doi/10.1111/mono.12349)) procedure. For each pair of translation equivalents, I computed their Levenshtein distance as the number of insertions, deletions and replacements a string character has to go through to become identical to the other, and then divided this value by the number of characters of the longest of the two strings, so that all values range between 0 and 1. To compute the Levenshtein distance, I used the `stringdist()` function of the `stringdist` R package.
+To compute the similarity of each pair of translation equivalents, I followed Floccia et al.'s ([2018](https://srcd.onlinelibrary.wiley.com/doi/10.1111/mono.12349)) procedure. For each pair of translation equivalents, I computed their Levenshtein distance as the number of insertions, deletions and replacements a string character has to go through to become identical to the other, and then divided this value by the number of characters of the longest of the two strings, so that all values range between 0 and 1. To compute the Levenshtein distance, I used the `stringdist()` function of the `stringdist` R package.
 
 
 ## Orthographic distance

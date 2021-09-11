@@ -45,12 +45,12 @@ Powerful as this technique is, it presents some pitfalls, especially to newbies 
 
 ## Intercept
 
-First, let's start with how the value of the **intercept** ($\beta_0$) changes the regression line for polynomials of different degree (1st, 2nd, and 3rd). I set the rest of the coefficients to arbitrary values for simplicity ($\beta_1 = \beta_2 = \beta_3 = 1$). As you can see, regardless of the order of the polynomials involved in the model, increasing the intercept makes the line be higher in the Y-axis, and decreasing the value of the intercept make the line be lower in the Y-axis. Simple as that.
+First, let's start with how the value of the **intercept** ($\beta_0$) changes the regression line for polynomials of different degree (1st, 2nd, and 3rd). I set the rest of the coefficients to arbitrary values for simplicity ($\beta_1 = \beta_2 = \beta_3 = 1$). As you can see, regardless of the order of the polynomials involved in the model, increasing the intercept makes the line be higher in the Y-axis, and decreasing the value of the intercept makes the line be lower in the Y-axis. Simple as that.
 
 ![](/img/intercept.gif)
 
 
-Thus, the interpretation of the intercept is similar to how do interpret it in standard linear regression models. It tells us the value of $y$ when all other coefficients are set to 0. As we will discuss later, what that means depends on what that zero means for the other coefficients, that is, how we coded them. For now, let's cotinue adding more terms to the equation.
+The interpretation of the intercept is similar to how we interpret it in standard linear regression models. It tells us the value of $y$ when all predictors are set to 0 (in our case $Time = 0$). As we will discuss later, what that means in practice depends on what that zero means for the other coefficients, that is, how we coded them. For now, let's continue adding more terms to the equation.
 
 
 ## Linear term: adding a 1st-order polynomial
@@ -59,12 +59,12 @@ Now let's see how a linear model (with only a 1st degree polynomial) changes as 
 
 ![](/img/linear.gif)
 
-When $\beta_1=0$, the resulting line is completely horizontal, parallel to the X-axis. This is what a model with just an intercept ($y = \beta_{0}$) would look like. We generalise this to say that the linear model we just visualised is exactly the same as adding a 2nd and a 3rd degree polynomial to the model with their correspondent coefficients set to zero ($\beta_2 = 0$ and $`\beta_3 = 0$, respectively).
+When $\beta_1=0$, the resulting line is completely horizontal, parallel to the X-axis. This is what a model with just an intercept ($y = \beta_{0}$) would look like. We generalise this to say that the linear model we just visualised is exactly the same as adding a 2nd and a 3rd degree polynomial to the model with their correspondent coefficients set to zero ($\beta_2 = 0$ and $\beta_3 = 0$, respectively).
  
  
 ## Quadratic: adding a 2nd-order polynomial
 
-Now things get a bit more interesting. When we add a second order polynomial ($Time^2$), the line is not linear any more. If the coefficient of the 2nd-order polynomial ($\beta_2$) is positive, the curve will go down and up in that order. When $\beta_2 < 0$, the curve goes up and then down. When $\beta_2 = 0$, the curve turns out the be a line whose slope is defined by $\beta_1$, just like in the previous example.
+Now things get a bit more interesting. When we add a second degree polynomial ($Time^2$), the line is not linear any more. If the coefficient of the 2nd-order polynomial ($\beta_2$) is positive, the curve will go down and up in that order. When $\beta_2 < 0$, the curve goes up and then down. When $\beta_2 = 0$, the curve turns out the be a line whose slope is defined by $\beta_1$, just like in the previous example.
 
 ![](/img/quadratic.gif)
 
@@ -73,7 +73,10 @@ Importantly, varying the value of the coefficient of 1st-order polynomials ($\be
  
 ## Cubic: adding a 3rd-order polynomial
 
-Finally, let's complicate things a bit more by adding a third-order polynomial. Now the curve will "fold" two times. As in the previous example, it's the value of $\beta_2$ (the coefficient of the 2nd order polynomial) that determines whether the curve goes down-up-down or up-down-up, depending on whether $\beta_2 < 0$ (*up-down-up*) or $\beta_2 > 0$ (*down-up-down*). how larger the value of the coefficient of the 3rd-order polynomial is (regardless of whether it's positive or negative) determines, for both "folding" points, how quickly the curve rises after dropping (if $\beta_2 > 0$), or how how quickly it drops after rising (if $\beta_2 < 0$). Finally, the value of $\beta_1$ changes the value of $x$ at which the curve folds. More negative values of $\beta_1$ make the curve fold at lower values of $x$, while more positive values of $\beta_1$ make the curve fold at higher values of $x$.
+Finally, let's complicate things a bit more by adding a third-order polynomial. Now the curve will "fold" two times. The magnitude of $\beta_3$ (the coefficient of the 3rd-degree polynomial) determines how distant both folding points are in the y-axis. When $\beta_3$ is close to zero, both folding points get closer, resembling the shape we've seen in a model with just a 2nd-degree polynomial. In fact, when $\beta_3 = 0$, we get the same plot (compare the panel to the right-upper corner to the plot in the previous section). The sign of $\beta_3$ also determines whether the curve goes down-up-down or up-down-up: *down-up-down* if $\beta_3 < 0$, and *up-down-up* if $\beta_3 > 0$.
+
+
+The magnitude of $\beta_2$ (the coefficient of the 2rd-degree polynomial) determines the location of the mid-point between both folding points. For more positive values of $\beta_2$ this point is located higher in the y-axis, while for more negative values of $\beta_2$, this point is located lower in the y-axis. This value is a bit difficult to put in perspective in our practical example. Probably $\beta_1$ is more informative: $\beta_1$ changes the value of $x$ at which the curve folds. More negative values of $\beta_1$ make the curve fold at lower values of $x$, while more positive values of $\beta_1$ make the curve fold at higher values of $x$.
 
 
 ![](/img/cubic.gif)

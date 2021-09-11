@@ -65,6 +65,8 @@ params:
       url: mailto:gonzalo.garciadecastro@upf.edu
     - name: github
       url: https://github.com/gongcastro
+    - name: gitlab
+      url: https://gitlab.com/gongcastro
   themeColor: #e8b941
 languages:
   en:

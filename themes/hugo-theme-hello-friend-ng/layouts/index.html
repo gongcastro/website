@@ -1,4 +1,6 @@
 {{ define "main" }}
+        <a class="twitter-timeline" href="https://twitter.com/gongcastro?ref_src=twsrc%5Etfw">Tweets by gongcastro</a> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
     <main aria-role="main">
         <div>
             {{ if .Site.Params.Portrait.Path }}
@@ -15,6 +17,7 @@
                     {{ partial "social-icons.html" . }}
                 </div>
             {{- end }}
+            
         </div>
     </main>
 {{ end }}

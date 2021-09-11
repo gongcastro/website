@@ -40,17 +40,26 @@ Santolin, C., **García-Castro, G.**, Zettersten, M., Sebastian-Galles, N., & Sa
 
 ### Posters
 
-**García-Castro, G.**, Siow, S., Sebastian-Galles, N. and Plunkett, Kim (July, 2020). The role of lexical similarity on bilingual parallel activation: A priming study in toddlers. Poster presented at the International Congress on Infant Studies (Edimburgh, United Kingdom, held online). proceedings
+**Garcia-Castro, G.**, Siow, S., Sebastian-Galles, N. and Plunkett, Kim (August, 2021). The impact of cognateness on bilingual lexical access: a longitudinal priming study. Lancaster Conference on Infant and Early Child Development (Lancaster, United Kingdom, held online).
 
-**García-Castro, G.**, Avila-Varela, D., and Sebastian-Galles, N. (July, 2020). Does phonological overlap across translation equivalents predict earlier age of acquisition?. Poster presented at the International Congress on Infant Studies (Edimburgh, United Kingdom, held online). proceedings
+**Garcia-Castro, G.**, Siow, S., Sebastian-Galles, N. and Plunkett, Kim (June, 2021). The role of cognateness in nonnative spoken word recognition. Poster presented at the XV International Symposium of Psycholinguistics (Madrid, Spain, held online).
 
-Siow, S., **García-Castro, G.**, Sebastian-Galles, N., and Plunkett, K. (August, 2019). The impact of phonology (cognateness) on the bilingual lexicon: Parallel cross-language phonological priming. Poster presented at the Lancaster Conference on Infant and Early Child Development (Lancaster, United Kingdom).
+**Garcia-Castro, G.**, Siow, S., Sebastian-Galles, N. and Plunkett, Kim (July, 2020). The role of lexical similarity on bilingual parallel activation: A priming study in toddlers. Poster presented at the International Congress on Infant Studies (Edimburgh, United Kingdom, held online). proceedings
 
-**García-Castro, G.**, Marimon, M., Santolin, C., and Sebastian-Galles, N. (June, 2019). Encoding new word forms when contrastive phonemes are interchanged: A preliminary study on 8-month-old infants. Poster presented at the Workshop in Infant Language Development (Potsdam, Germany). https://doi.org/10.17605/OSF.IO/GYKUH
+**Garcia-Castro, G.**, Avila-Varela, D., and Sebastian-Galles, N. (July, 2020). Does phonological overlap across translation equivalents predict earlier age of acquisition?. Poster presented at the International Congress on Infant Studies (Edimburgh, United Kingdom, held online). proceedings
+
+Siow, S., **Garcia-Castro, G.**, Sebastian-Galles, N., and Plunkett, K. (August, 2019). The impact of phonology (cognateness) on the bilingual lexicon: Parallel cross-language phonological priming. Poster presented at the Lancaster Conference on Infant and Early Child Development (Lancaster, United Kingdom).
+
+**Garcia-Castro, G.**, Marimon, M., Santolin, C., and Sebastian-Galles, N. (June, 2019). Encoding new word forms when contrastive phonemes are interchanged: A preliminary study on 8-month-old infants. Poster presented at the Workshop in Infant Language Development (Potsdam, Germany). https://doi.org/10.17605/OSF.IO/GYKUH
 
 **García-Castro, G.**, Álvarez-Suárez, P., García-Abad, N., Cuesta, M., and Begega, A. (June, 2017). Pro-cognitive effects of environmental enrichment on attention and spatial memory: hippocampal metabolic activity in a Wistar rat model. Poster presented at the 4th International Congress on Health and Aging Research (Murcia, Spain).
 
 García-Abad, N., Santirso, M., **García-Castro, G.**, and Álvarez-Suárez, P. (June, 2017). Efectos del omega-3 en las redes implicadas en la memoria de trabajo espacial en ratas Wistar. Poster presented at the 3rd National Congress of Psychology (Oviedo, Spain)
+
+### Talks
+
+Siow, S., **Garcia-Castro, G.**, Sebastian-Galles, N., and Plunkett, K. (August, 2019). An alternative approach to defining cross-linguistic phonological similarity using a model of monolingual speech recognition. Short talk at the conference for Architectures and Mechanisms for Language Processing (Paris, France, held online). [proceedings](https://amlap2021.github.io/program/23.pdf)
+
 
 ### Scientific dissemination
 
